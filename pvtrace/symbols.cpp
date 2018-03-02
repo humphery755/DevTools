@@ -27,7 +27,7 @@ unsigned int totals[MAX_FUNCTIONS];
 unsigned int calls[MAX_FUNCTIONS][MAX_FUNCTIONS];
 
 static char imageName[MAX_FUNCTION_NAME];
-static char line[MAX_FUNCTION_NAME+100];
+static char line[MAX_FUNCTION_NAME];
 
 static int lookupSymbol( unsigned int address )
 {
