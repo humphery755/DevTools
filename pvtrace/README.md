@@ -2,8 +2,7 @@ C/C++ Call Graph Generator
 ==================
 
 ## install
-*os install graphviz, graphviz-dev, pygraphviz
-## compile
+os install graphviz, graphviz-dev, pygraphviz<br /><br />
 cd pvtrace<br />
 make<br />
 ls<br />
