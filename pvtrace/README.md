@@ -20,8 +20,8 @@ pvtrace test<br />
 ls<br />
 graph.dot        test           trace.txt<br />
 test.c<br />
-## dot to generate the graph.jpg
-dot -Tjpg graph.dot -o graph.jpg<br />
+## dot to generate the graph.svg
+dot -T svg graph.dot -o graph.svg<br />
 ls<br />
 graph.dot        test.c		   test<br />
-graph.jpg        trace.txt<br />
+graph.svg        trace.txt<br />
