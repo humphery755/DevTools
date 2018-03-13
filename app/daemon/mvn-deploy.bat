@@ -1,0 +1,1 @@
+mvn compile -DskipTests=true && mvn install -DskipTests=true && mvn deploy:deploy-file -Durl=http://192.168.100.41:8081/artifactory/ext-release-local  -DrepositoryId=yxqm_mvn  -Dfile=target\daemon-wrapper-0.1.0.jar -DpomFile=pom.xml -Dversion=0.1.0

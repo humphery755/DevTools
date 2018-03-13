@@ -1,0 +1,27 @@
+#
+# The client reads this property to create the reference to the
+# "hello" object in the server.
+#
+#tddl.sequences.SequenceService-V1=tddl.sequences.SequenceService-V1:tcp -h 192.168.1.1 -p 9000 -t 30000
+#tddl.sequences.OrderSequenceService-V1=ExtIce.TEST.Router/tddl.sequences.OrderSequenceService-V1
+#tddl.sequences.SequenceService-V1=ExtIce.TEST.Router/tddl.sequences.SequenceService-V1
+#
+# The IceGrid locator proxy.
+#
+app.ver=-Test
+
+Ice.Default.Locator=DemoIceGrid/Locator:tcp -h 192.168.1.1 -p 4066
+#Ice.Default.Router=DemoGlacier2/router:tcp -h 192.168.1.2 -p 5064|test/passwd
+#ExtIce.TEST.Router=DemoGlacier2/router:tcp -h 192.168.1.2 -p 5064|T1/passwd
+#ExtIce.TEST1.Router=DemoGlacier2/router:tcp -h 192.168.1.2 -p 5064|T2/passwd
+Ice.Default.LocatorCacheTimeout=120
+
+#
+# To use the IceGrid discovery plugin comment out the default locator
+# property above and un-comment the two properties below. The discovery
+# plugin uses multicast to discover IceGrid.
+#
+#Ice.Plugin.IceLocatorDiscovery=IceLocatorDiscovery:createIceLocatorDiscovery
+#IceLocatorDiscovery.InstanceName=DemoIceGrid
+
+Ice.TCP.SndSize=131072

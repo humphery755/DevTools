@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Built-By: humphery
+Build-Jdk: 1.7.0_80
+Premain-Class: com.yxqm.fw.trace.TraceLogPreMain
+Can-Redefine-Classes: true
+Can-Retransform-Classes: true
+Can-Set-Native-Method-Prefix: true

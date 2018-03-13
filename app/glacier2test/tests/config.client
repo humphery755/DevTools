@@ -1,0 +1,29 @@
+#
+# The client reads this property to create the reference to the
+# "hello" object in the server.
+#
+#tddl.sequences.SequenceService.Proxy=tddl.sequences.SequenceService
+#tddl.sequences.SequenceService-V1=tddl.sequences.SequenceService-V1:tcp -h 192.168.1.11 -p 29236
+#tddl.sequences.SequenceService-V2=ExtIce.Default.Locator
+tddl.sequences.SequenceService-V1=ExtIce.SEGI.Router/tddl.sequences.SequenceService-V1
+#
+# The IceGrid locator proxy.
+#
+#Ice.Default.Locator=DemoIceGrid/Locator:tcp -h 192.168.1.11 -p 4066
+#ExtIce.SEGI.Locator=DemoIceGrid/Locator:tcp -h 192.168.1.11 -p 4066
+#Ice.Default.Router=DemoGlacier2/router:ssl -h 192.168.1.10 -p 5066|test22/passwd222
+ExtIce.SEGI.Router=DemoGlacier2/router:ssl -h 192.168.1.10 -p 5066|test33/passwd333
+Ice.Default.LocatorCacheTimeout=120
+
+#
+# To use the IceGrid discovery plugin comment out the default locator
+# property above and un-comment the two properties below. The discovery
+# plugin uses multicast to discover IceGrid.
+#
+#Ice.Plugin.IceLocatorDiscovery=IceLocatorDiscovery:createIceLocatorDiscovery
+#IceLocatorDiscovery.InstanceName=DemoIceGrid
+
+Ice.TCP.SndSize=131072
+Ice.Plugin.IceSSL=IceSSL:createIceSSL
+IceSSL.VerifyPeer=0
+Glacier2.Client.Trace.Request=2

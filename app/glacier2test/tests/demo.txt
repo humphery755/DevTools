@@ -1,0 +1,59 @@
+##Registry configuration
+#Default Locator
+Ice.Default.Locator=IceGrid/Locator:tcp -h guidoarco.mine.nu -p 4061
+
+#Node Configuration
+IceGrid.Node.Name=guido
+IceGrid.Node.Endpoints=tcp
+IceGrid.Node.Data=/var/icegridnode/db/node
+IceGrid.Node.Output=/tmp
+
+IceGrid.Node.CollocateRegistry=1
+
+#Registry Configuration
+IceGrid.Registry.Client.Endpoints=tcp -h guidoarco.mine.nu -p 4061
+IceGrid.Registry.Server.Endpoints=tcp
+IceGrid.Registry.Internal.Endpoints=tcp
+IceGrid.Registry.Data=/var/icegridnode/db/registry
+IceGrid.Registry.AdminPermissionsVerifier=IceGrid/NullPermissionsVerifier
+IceGrid.Registry.DefaultTemplates=/usr/share/doc/ice33-services/config/templates.xml
+
+#Glacier Integration
+#IceGrid.Registry.SessionManager.Endpoints=tcp -h guidoarco.mine.nu -p 4060
+IceGrid.Registry.AdminSessionManager.Endpoints=tcp -h guidoarco.mine.nu -p 4060
+
+#Logs
+Ice.Trace.Locator=2
+IceGrid.Registry.Trace.Session=2
+IceGrid.Registry.Trace.Adapter=1
+
+
+#########################################################
+##Glacier configuration
+## Public Access
+Glacier2.Client.Endpoints=tcp -h guidoarco.mine.nu -p 4063
+
+## Private Network
+Glacier2.Server.Endpoints=tcp -h 161.67.38.76
+
+Glacier2.SessionTimeout=60
+
+## Open Access
+Glacier2.PermissionsVerifier=Glacier2/NullPermissionsVerifier
+#Glacier2.Filter.Address.Accept
+
+## Locator to IceGrid
+Ice.Default.Locator=IceGrid/Locator:tcp -h guidoarco.mine.nu -p 4061
+
+## SessionManager
+Glacier2.SessionManager=IceGrid/SessionManager
+Glacier2.SessionManager.LocatorCacheTimeout=60
+
+# Logs
+Ice.Trace.Locator=2
+Ice.Warn.Connections=1
+Glacier2.Trace.Session=1
+
+
+#########################################################
+##

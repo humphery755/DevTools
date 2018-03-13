@@ -1,0 +1,2 @@
+clientTrace=com.yxqm.fw.trace.ClientTraceFilter
+serviceTrace=com.yxqm.fw.trace.ServiceTraceFilter
