@@ -35,7 +35,12 @@ namespace multidb
 	private:
 		pthread_mutex_t *lock;
 	public:
-		Lock(pthread_mutex_t *l){lock=l;pthread_mutex_lock(lock);}
+		Lock(pthread_mutex_t *l){
+			lock=l;
+			if(pthread_mutex_lock(lock)!=0){
+				throw sql::SQLException("SystemError: can't get lock");
+			}
+		}
 		virtual ~Lock(){pthread_mutex_unlock(lock);}
 	};
 
@@ -67,8 +72,8 @@ namespace multidb
 		bool						autoCommitCache;
 	public:
 		int64_t 					lastTime;   		//最后一次访问时间
-
-		Connection(ConnectOptions *opt,sql::Connection *con){connOpt=opt;conn=con;autoCommitCache=true;}
+		bool						isErr;
+		Connection(ConnectOptions *opt,sql::Connection *con){connOpt=opt;conn=con;autoCommitCache=true;isErr=false;}
 		virtual ~Connection() {delete conn;};
 		virtual sql::PreparedStatement * prepareStatement(const sql::SQLString& _sql){return conn->prepareStatement(_sql);}
 		virtual const sql::SQLWarning * getWarnings(){return conn->getWarnings();}
@@ -270,6 +275,5 @@ namespace multidb
 };	
 	
 #endif 
-
 
 

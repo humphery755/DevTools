@@ -20,7 +20,7 @@
 #include <sys/epoll.h>
 #include <glog/logging.h>
 #include <Ice/Ice.h>
-#include <tddl_sequence_SequenceServiceI.h>
+#include <SequenceServiceI.h>
 #include "IceExtClientUtil.h"
 #include "zookeeper_helper.h"
 #include "OrderSequenceAdapter.h"
@@ -206,7 +206,9 @@ void startOrderSequence(const Ice::CommunicatorPtr& _communicator, Ice::Properti
     name_stream << ADAPTER_NAME << version;
     LOG(INFO) << "start createAdapter: " << name_stream.str();
     adapter = communicator->createObjectAdapter(name_stream.str());  
-    tddl::sequences::SequenceServicePtr orderSeqSvc = new tddl_sequence_SequenceServiceI(name_stream.str(),_clientUtil);    
+    int workerId = prop->getPropertyAsInt("seq.workerId");
+	int datacenterId = prop->getPropertyAsInt("seq.datacenterId");
+    tddl::sequences::SequenceServicePtr orderSeqSvc = new tddl_sequence_SequenceServiceI(workerId,datacenterId);    
     adapter->add(orderSeqSvc, communicator->stringToIdentity(adapter->getName()));
 
     int err = pthread_create(&test_id, NULL, start_leader_election, NULL); 

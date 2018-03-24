@@ -265,6 +265,12 @@ int threads=1;
 
 
 int main(int argc, char** argv) {
+  if(argc>1){
+    char *strTh=argv[1];
+    threads=atoi(strTh);
+  }
+  err_total=0;
+
   google::InitGoogleLogging("dbtest");
   google::SetStderrLogging(google::GLOG_FATAL);//设置级别高于 google::FATAL 的日志同时输出到屏幕
   string logdir = "./logs/";
@@ -286,13 +292,9 @@ int main(int argc, char** argv) {
   FLAGS_logbufsecs = 0; //缓冲日志输出，默认为30秒，此处改为立即输出
   FLAGS_max_log_size = 100; //最大日志大小为 100MB
 
-  //string strurl = "admin/admin@myodbc2serorder";
   string strurl = "Driver=MYSQL UTF8;Server=192.168.1.12;Database=serorder;UID=admin;PWD=admin";
-  //string strurl = "mysql://192.168.1.12:3306/serorder?user=admin&password=admin";
-  //string strurl = "mysql://10.30.220.32:16666/uorder?user=uorder&password=uorder"; //SEGI
-  //string strurl = "mysql://100.114.252.0:6666/zs_uorder?user=zs_uorder&password=zs_uorder"; //ZS
   for(int i=0;i<10;i++)
-    if(!multidb::MySQLDBPool::GetMySQLPool()->RegistDataBase(i,"admin/admin@192.168.1.12:3306/serorder",32,1<<12))return 1;
+    if(!multidb::MySQLDBPool::GetMySQLPool()->RegistDataBase(i,"admin/admin@192.168.1.12:3306/serorder",32,threads<<9))return 1;
 
   if(!multidb::MySQLDBPool::GetMySQLPool()->Startup())return 1;
 
@@ -300,39 +302,23 @@ if(1==0)BENCHMARK(BM_SQL_test1)->Arg(1)->Threads(1);
   /*
 
     */
-  if(argc>1){
-    char *strTh=argv[1];
-    threads=atoi(strTh);
-  }
-
-  err_total=0;
+  
  
 
- // BENCHMARK_XXX(threads,64)
- //BENCHMARK_XXX(1<<10,1<<10)
-  BENCHMARK_XXX(1<<9,1<<9)
- BENCHMARK_XXX(1<<8,1<<8)
-  BENCHMARK_XXX(1<<7,1<<7)
-  BENCHMARK_XXX(1<<6,1<<3)
-  BENCHMARK_XXX(1<<5,1<<3)
-  BENCHMARK_XXX(1<<4,1<<3)
-  BENCHMARK_XXX(1<<3,1<<3)
-  //BENCHMARK_XXX(2<<10,2<<10)
-   /*
-     BENCHMARK_XXX(threads,512)
-  BENCHMARK_XXX(threads,1<<10)
-  BENCHMARK_XXX(threads,2<<10)
-  BENCHMARK_XXX(threads,4<<10)
-  BENCHMARK_XXX(threads,8<<10)
-  BENCHMARK_XXX(threads,16<<10)
-  BENCHMARK_XXX(threads,32<<10)
-   BENCHMARK(BM_SQL_test)->Arg(64)->Threads(1);
-  */
-  
+
+
+  BENCHMARK_XXX(threads<<9,1<<9)
+  BENCHMARK_XXX(threads<<8,1<<8)
+  BENCHMARK_XXX(threads<<7,1<<7)
+  BENCHMARK_XXX(threads<<6,1<<3)
+  BENCHMARK_XXX(threads<<5,1<<3)
+  BENCHMARK_XXX(threads<<4,1<<3)
+  BENCHMARK_XXX(threads<<3,1<<3)
+
 
   ::benchmark::Initialize(&argc, argv);
   
-  // while(1)::benchmark::RunSpecifiedBenchmarks();
+  while(1)::benchmark::RunSpecifiedBenchmarks();
   multidb::MySQLDBPool::GetMySQLPool()->ReleaseAll();
 	google::ShutdownGoogleLogging();
 }

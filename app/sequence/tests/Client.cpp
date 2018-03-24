@@ -8,11 +8,10 @@
 #include <Glacier2/Router.h>
 #include <glog/logging.h>
 #include <tdd_sequence.h>
-#include "IceExt_IceClientUtil.h"
 #include <benchmark/benchmark.h>
 #include <string.h>
 #include <uuid/uuid.h>
-#include "dbutil.h"
+#include "IceExtClientUtil.h"
 #include <tddl_sequence_SequenceServiceI.h>
 
 using namespace std;
@@ -89,20 +88,14 @@ static void BM_SequenceService_nextValue(benchmark::State& state) {
   }
   string verkey="app.ver";
   string strVersion = clientUtil->getProperty(verkey,EMPTY_STRING);
-  SequenceServicePrx sequence;
   string s1="tddl.sequences.SequenceService";
   s1.append(strVersion);
-  Ice::ObjectPrx objPrx1 = clientUtil->stringToProxy(s1);
-  if(!objPrx1)
+  SequenceServicePrx sequence;
+  sequence = clientUtil->stringToProxy(sequence,s1);
+
+  if(!sequence)
   {
       cerr <<  ": invalid or missing stringToProxy:" << s1<< endl;
-      return ;
-  }
-  //cout << &objPrx1 << endl;
-  sequence  = SequenceServicePrx::checkedCast(objPrx1);
-   if(!sequence)
-  {
-      cerr <<  ": invalid or missing tddl.sequences.SequenceService.Proxy property" << endl;
       return ;
   }
 
@@ -155,19 +148,13 @@ static void BM_OrderSequenceService_nextValue(benchmark::State& state) {
     string strVersion = clientUtil->getProperty(verkey,EMPTY_STRING);
     string s="tddl.sequences.OrderSequenceService";
     s.append(strVersion);
-    Ice::ObjectPrx objPrx = clientUtil->stringToProxy(s);
-    if(!objPrx)
-    {
+    orderSequence = clientUtil->stringToProxy(orderSequence,s);
+  if(!orderSequence)
+  {
         cerr <<  ": invalid or missing stringToProxy:" << s<< endl;
         return ;
     }
-    //cout << &objPrx << endl;
-    orderSequence  = SequenceServicePrx::checkedCast(objPrx);
-     if(!orderSequence)
-    {
-        cerr <<  ": invalid or missing tddl.sequences.OrderSequenceService property" << endl;
-        return ;
-    }
+
     //char *src=new char[state.range(0)];
     //memset(src, 'x', state.range(0));
     SequenceRange seqRange;
@@ -307,23 +294,15 @@ int main(int argc, char** argv) {
     char *strTh=argv[1];
     threads=atoi(strTh);
   }
-if(1==0){
+if(1==1){
   string verkey="app.ver";
   string strVersion = clientUtil->getProperty(verkey,EMPTY_STRING);
   string s="tddl.sequences.SequenceService";
   s.append(strVersion);
-  Ice::ObjectPrx objPrx = clientUtil->stringToProxy(s);
-  if(!objPrx)
+  orderSequence = clientUtil->stringToProxy(orderSequence,s);
+  if(!orderSequence)
   {
       cerr <<  ": invalid or missing stringToProxy:" << s<< endl;
-      return 0;
-  }
-  //cout << &objPrx << endl;
-  
-  orderSequence  = SequenceServicePrx::checkedCast(objPrx);
-   if(!orderSequence)
-  {
-      cerr <<  ": invalid or missing tddl.sequences.SequenceService property" << endl;
       return 0;
   }
 
@@ -366,7 +345,7 @@ test();
   while(1)::benchmark::RunSpecifiedBenchmarks();
   clientUtil->destroy();
 }
-
+/*
 SequenceRangeI::SequenceRangeI(){
 }
 
@@ -384,3 +363,4 @@ int SequenceRangeI::getAndIncrement(int step,tddl::sequences::SequenceRange& sr)
 	sr.max=currentValue;
 	return 0;
 }
+*/

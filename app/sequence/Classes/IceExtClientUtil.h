@@ -39,7 +39,7 @@ private:
 
 template<class T> T IceClientUtil::stringToProxy(T,std::string& id)
 {
-	
+	std::string svcId=id;
     std::string s = prop->getPropertyWithDefault(id,EMPTY_STRING);
 	CommunicatorProxyI *communicator=NULL;
     if(s.length()>5){
@@ -47,8 +47,10 @@ template<class T> T IceClientUtil::stringToProxy(T,std::string& id)
 		it = cmap.find(s);
 		if (it != cmap.end()){
 			communicator = it->second;
+		}else{
+			communicator = _communicator;
+			svcId=s;
 		}
-
 	}else{
 		communicator = _communicator;
 	}
@@ -59,12 +61,12 @@ template<class T> T IceClientUtil::stringToProxy(T,std::string& id)
 		return NULL;
 	} 
 
-	Ice::ObjectPrx obj = communicator->stringToProxy(id);
+	Ice::ObjectPrx obj = communicator->stringToProxy(svcId);
 
 	if(!obj)
 	{
 		Ice::Error out(Ice::getProcessLogger());
-		out <<  "invalid or missing stringToProxy:" << id;
+		out <<  "invalid or missing stringToProxy:" << svcId;
 		return NULL;
 	}
 	T result;
@@ -72,7 +74,7 @@ template<class T> T IceClientUtil::stringToProxy(T,std::string& id)
 	if(!result)
 	{
 		Ice::Error out(Ice::getProcessLogger());
-		out <<  "checkedCast is null by :" << id;
+		out <<  "checkedCast is null by :" << svcId;
 		return NULL;
 	}
 	return result;    
@@ -80,3 +82,4 @@ template<class T> T IceClientUtil::stringToProxy(T,std::string& id)
 
 }
 #endif
+

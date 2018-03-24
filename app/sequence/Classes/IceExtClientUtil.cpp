@@ -278,7 +278,6 @@ std::string IceClientUtil::getProperty(std::string& k,std::string& v){return pro
 
 std::string IceClientUtil::getAppName(){return IceInternal::Application::_appName;}
 
-
 int IceClientUtil::initialize()
 {
     pthread_rwlock_init(&lock,NULL);

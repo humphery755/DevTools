@@ -64,7 +64,6 @@ multidb::MySQLDBPool::MySQLDBPool()
 	pthread_mutex_init (&pool_lock, NULL);	
 }
 
-
 multidb::MySQLDBPool::~MySQLDBPool()
 {
 	ReleaseAll();
@@ -380,7 +379,7 @@ multidb::Connection* multidb::MySQLSingleDBPool::GetConnection()
 		__sync_add_and_fetch(&usedConns,1);
 		return pconn;
 	}
-	LOG(ERROR) << "Cannot get connection: No resources currently available in pool-"<<connOpt.dbid <<" to allocate to applications, please increase the size of the pool and retry..";
+	LOG(ERROR) << "Cannot get connection: No resources currently available("<< usedConns <<") in pool-"<<connOpt.dbid <<" to allocate to applications, please increase the size of the pool and retry..";
 	return NULL;
 }
 
@@ -391,7 +390,7 @@ void multidb::MySQLSingleDBPool::ReleaseConnect(Connection *pConn,bool bConngood
 		return;
 	}
 
-	if(runing && bConngood){
+	if(runing && (bConngood || !pConn->isErr)){
 		pConn->lastTime = multidb::MySQLDBPool::GetMySQLPool()->getCurrentTime();
 		Lock l(&lock);
 		freeQueue.push(pConn);
@@ -442,3 +441,4 @@ int multidb::MySQLSingleDBPool::CheckConnection()
 	}
 	return 0;
 }
+

@@ -6,7 +6,7 @@
 // **********************************************************************
 
 #include <Ice/Ice.h>
-#include <tddl_sequence_SequenceServiceI.h>
+#include <SequenceServiceI.h>
 #include <Freeze/Freeze.h>
 #include <stdio.h>
 #include <string>  
@@ -39,13 +39,13 @@ static IceClientUtil *clientUtil = new IceClientUtil("sequence","conf/config.cli
 
 SequenceServiceIcebox::SequenceServiceIcebox(){}
 
-void SignalHandle(const char* data, int size)
+static void SignalHandle(const char* data, int size)
 {
     std::string str = std::string(data,size);
     LOG(ERROR)<<str;
 }
 
-void initGlog(Ice::PropertiesPtr& prop){
+static void initGlog(Ice::PropertiesPtr& prop){
 	string logdir = prop->getPropertyWithDefault("glog.logDestination","./logs/");
 	int maxLogSize = prop->getPropertyAsIntWithDefault("glog.maxLogSize",1000);
 	int logbufsecs = prop->getPropertyAsIntWithDefault("glog.logbufsecs",30);
@@ -112,11 +112,12 @@ SequenceServiceIcebox::start(const string& _name, const Ice::CommunicatorPtr& co
 	ostringstream name_stream;
 	name_stream << _name << version;
 	LOG(INFO) << "start createAdapter: " << name_stream.str();
-	_adapter = communicator->createObjectAdapter(name_stream.str());	
+	_adapter = communicator->createObjectAdapter(name_stream.str());
 
 	startOrderSequence(communicator, prop,clientUtil);
-
-	tddl::sequences::SequenceServicePtr seqSvc = new tddl_sequence_SequenceServiceI(name_stream.str(),clientUtil);
+	int workerId = prop->getPropertyAsInt("seq.workerId");
+	int datacenterId = prop->getPropertyAsInt("seq.datacenterId");
+	tddl::sequences::SequenceServicePtr seqSvc = new tddl_sequence_SequenceServiceI(workerId,datacenterId);
 	_adapter->add(seqSvc, communicator->stringToIdentity(_adapter->getName()));
 	LOG(INFO) << "The Adapter:" << _adapter->getName() << " will be activated.";
 	_adapter->activate();	
