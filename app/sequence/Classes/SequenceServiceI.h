@@ -14,8 +14,6 @@
 #include "tdd_sequence.h"
 #include "IceExtClientUtil.h"
 
-#define I_SEQ_LOCK_TOTAL 10
-
 extern char version[50];
 
 class Lock
@@ -133,20 +131,20 @@ private:
 	pthread_mutex_t 	lock = PTHREAD_MUTEX_INITIALIZER;
 };
 
-class tddl_sequence_SequenceServiceI : public tddl::sequences::SequenceService
+class SequenceServiceI : public tddl::sequences::SequenceService
 {
 public:
-	tddl_sequence_SequenceServiceI(int64_t workerId, int64_t datacenterId);
-	virtual ~tddl_sequence_SequenceServiceI();
+	SequenceServiceI(unsigned int workerId, unsigned int datacenterId);
+	virtual ~SequenceServiceI();
 	virtual tddl::sequences::SequenceRange nextValue(const ::std::string&, ::Ice::Int, const ::Ice::Current&);
 
 private:
 	std::map<std::string, SequenceWorker*> rangeMap;
 	pthread_rwlock_t rangeLock;
 	/** 工作机器ID(0~31) */
-    int64_t workerId;
+    unsigned int workerId;
     /** 数据中心ID(0~31) */
-    int64_t datacenterId;
+    unsigned int datacenterId;
 };
 
 class SequenceServiceIcebox : public ::IceBox::Service

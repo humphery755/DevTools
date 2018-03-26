@@ -208,7 +208,7 @@ void startOrderSequence(const Ice::CommunicatorPtr& _communicator, Ice::Properti
     adapter = communicator->createObjectAdapter(name_stream.str());  
     int workerId = prop->getPropertyAsInt("seq.workerId");
 	int datacenterId = prop->getPropertyAsInt("seq.datacenterId");
-    tddl::sequences::SequenceServicePtr orderSeqSvc = new tddl_sequence_SequenceServiceI(workerId,datacenterId);    
+    tddl::sequences::SequenceServicePtr orderSeqSvc = new SequenceServiceI(workerId,datacenterId);    
     adapter->add(orderSeqSvc, communicator->stringToIdentity(adapter->getName()));
 
     int err = pthread_create(&test_id, NULL, start_leader_election, NULL); 

@@ -29,7 +29,6 @@ using namespace tddl::sequences;
 static int retryTimes=100;
 
 
-//const char * split = (char*)","; 
 static int getAlgorithmCfg(string name){
 	multidb::Connection *con = multidb::MySQLDBPool::GetMySQLPool()->GetConnection(0);
 	if(con==NULL){
@@ -64,18 +63,18 @@ static int getAlgorithmCfg(string name){
 }
 
 
-tddl_sequence_SequenceServiceI::tddl_sequence_SequenceServiceI(int64_t workerId, int64_t datacenterId)
+SequenceServiceI::SequenceServiceI(unsigned int workerId, unsigned int datacenterId)
 {
 	pthread_rwlock_init(&rangeLock,NULL);
 	this->workerId = workerId;
 	this->datacenterId=datacenterId;
 }
 
-tddl_sequence_SequenceServiceI::~tddl_sequence_SequenceServiceI(){
+SequenceServiceI::~SequenceServiceI(){
 	pthread_rwlock_destroy(&rangeLock);
 }
 
-SequenceRange tddl_sequence_SequenceServiceI::nextValue(const ::std::string& name, ::Ice::Int step, const ::Ice::Current&)
+SequenceRange SequenceServiceI::nextValue(const ::std::string& name, ::Ice::Int step, const ::Ice::Current&)
 {
 	LOG(INFO) << __FUNCTION__ << "(seqName:=" << name << ", step:=" << step << ")";
 	SequenceWorker *currentRange = NULL;

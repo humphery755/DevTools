@@ -6,7 +6,8 @@
 
 #include <Ice/Ice.h>
 #include <glog/logging.h>
-#include <tddl_sequence_SequenceServiceI.h>
+#include "MySQLDBPool.h"
+#include <SequenceServiceI.h>
 
 using namespace std;
 
@@ -81,10 +82,24 @@ Server::run(int argc, char*[])
 		return -1;
 	}
     initGlog(prop);
+
+	string strUrl = prop->getPropertyWithDefault("seq.database.driver.url","root/1@127.0.0.1:3306/test");
+	int minPoolSize = prop->getPropertyAsInt("seq.database.driver.minPoolSize");
+	int maxPoolSize = prop->getPropertyAsInt("seq.database.driver.maxPoolSize");
+	LOG(INFO) << "driverUrl = " << strUrl << ", minPoolSize=" << minPoolSize<< ", maxPoolSize=" << maxPoolSize;
+
+	if(!multidb::MySQLDBPool::GetMySQLPool()->RegistDataBase(0,strUrl.c_str(),minPoolSize,maxPoolSize))return 1;
+  	if(!multidb::MySQLDBPool::GetMySQLPool()->Startup())return 1;
+
+	int workerId = prop->getPropertyAsInt("seq.workerId");
+	int datacenterId = prop->getPropertyAsInt("seq.datacenterId");
+
     Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("tddl.sequences.SequenceService");
-	tddl::sequences::SequenceServicePtr seqService = new tddl_sequence_SequenceServiceI(0,0);
+	tddl::sequences::SequenceServicePtr seqService = new tddl_sequence_SequenceServiceI(workerId,datacenterId);
+	tddl::sequences::SequenceServicePtr orderSequence = new tddl_sequence_SequenceServiceI(workerId,datacenterId);
     //Demo::PricingEnginePtr pricing = new PricingI(properties->getPropertyAsList("Currencies"));
     adapter->add(seqService, communicator()->stringToIdentity("tddl.sequences.SequenceService"));
+	adapter->add(orderSequence, communicator()->stringToIdentity("tddl.sequences.OrderSequenceService"));
     adapter->activate();
     communicator()->waitForShutdown();
     return EXIT_SUCCESS;

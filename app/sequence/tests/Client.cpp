@@ -12,7 +12,7 @@
 #include <string.h>
 #include <uuid/uuid.h>
 #include "IceExtClientUtil.h"
-#include <tddl_sequence_SequenceServiceI.h>
+#include <SequenceServiceI.h>
 
 using namespace std;
 using namespace tddl::sequences;
@@ -31,53 +31,12 @@ IceClientUtil *clientUtil = new IceClientUtil("clientTest","conf/config.client")
 
 
 static uint32_t err_total;
-#define ARRAY_LEN 1
-/*
-string array[ARRAY_LEN]={ "user_busi_rel_id_seq",
-"user_area_rel_id_seq",
-"template_overtime_conf_seq",
-"template_node_inst_rel_id",
-"template_node_id_seq",
-"template_inst_id_seq",
-"template_inst_condition_node_id",
-"template_id_seq",
-"template_dif_id_seq",
-"template_busi_type_id_seq",
-"template_attr_id_seq",
-"tb_uhome_user_seq",
-"tb_uhome_user_house_seq",
-"tb_uhome_user_community_rel_seq",
-"tb_uhome_user_attr_seq",
-"tb_uhome_strong_token_seq",
-"tb_uhome_address_seq",
-"tache_id_seq",
-"service_visual_range_id",
-"service_authorization_id",
-"SEQ_TRACK_ID",
-"SEQ_TEST_RPC",
-"SEQ_SUPERVISE_ID",
-"SEQ_ROTATE_ID",
-"SEQ_ORDER_USER_ID",
-"SEQ_ORDER_ID",
-"SEQ_HANG_ID",
-"SEQ_DEAL_USER_ID",
-"SEQ_COMMENT_ID",
-"SEQ_ATTR_INST_ID",
-"pay_record_vpayid_seq",
-"pay_record_seq",
-"pay_mch_info_seq",
-"pay_mch_bz_rel_seq",
-"node_inst_id",
-"node_attr_value_id_seq",
-"node_attr_id_seq",
-"management_user_rel_id_seq",
-"management_id_seq",
-"c_user_account_seq",
-"authorization_busi_rel_id_seq",
-"attr_value_id_seq",
-"attr_inst_id"};
-*/
-string array[ARRAY_LEN]={ "TEST_1"};
+#define ARRAY_LEN 4
+string array[ARRAY_LEN]={ "TEST_1",
+"TEST_2",
+"TEST_3",
+"TEST_4"};
+//string array[ARRAY_LEN]={ "TEST_1"};
 
 
 static void BM_SequenceService_nextValue(benchmark::State& state) {
@@ -235,7 +194,7 @@ int test(){
   ctx["tId"] = "xxxxx";
   ctx["rId"] = "1";
 
-  string seq_name="TEST_1";//SEQ_TEST_1
+  string seq_name="TEST_4";//SEQ_TEST_1
   try{
     seqRange=orderSequence->nextValue(seq_name,1,ctx);
     cout << "max: "<<seqRange.max<<", min: "<<seqRange.min<<endl;
@@ -294,7 +253,7 @@ int main(int argc, char** argv) {
     char *strTh=argv[1];
     threads=atoi(strTh);
   }
-if(1==1){
+if(1==0){
   string verkey="app.ver";
   string strVersion = clientUtil->getProperty(verkey,EMPTY_STRING);
   string s="tddl.sequences.SequenceService";
@@ -322,20 +281,20 @@ test();
   err_total=0;
   
 
-  //BENCHMARK_YYY(64,64)
+  BENCHMARK_YYY(64,64)
   BENCHMARK_XXX(64,64)
   BENCHMARK_XXX(512,512)
-  //BENCHMARK_YYY(512,512)
+  BENCHMARK_YYY(512,512)
   BENCHMARK_XXX(1<<10,1<<10)
-  //BENCHMARK_YYY(1<<10,1<<10)
+  BENCHMARK_YYY(1<<10,1<<10)
   BENCHMARK_XXX(2<<10,2<<10)
-  //BENCHMARK_YYY(2<<10,2<<10)
+  BENCHMARK_YYY(2<<10,2<<10)
   BENCHMARK_XXX(4<<10,4<<10)
-  //BENCHMARK_YYY(4<<10,4<<10)
+  BENCHMARK_YYY(4<<10,4<<10)
   BENCHMARK_XXX(8<<10,8<<10)
-  //BENCHMARK_YYY(8<<10,8<<10)
+  BENCHMARK_YYY(8<<10,8<<10)
   BENCHMARK_XXX(16<<10,16<<10)
-  //BENCHMARK_YYY(16<<10,16<<10)
+  BENCHMARK_YYY(16<<10,16<<10)
   BENCHMARK_XXX(32<<10,32<<10)
   if(1==0)
   BENCHMARK_YYY(32<<10,32<<10)

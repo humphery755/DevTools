@@ -1,9 +1,9 @@
 CREATE TABLE `t_sequence` (
-  `name` varchar(255) NOT NULL,
+  `name` varchar(50) NOT NULL,
   `value` bigint(20) NOT NULL,
   `gmt_modified` timestamp NOT NULL ON UPDATE CURRENT_TIMESTAMP,
   `step` int(11) NOT NULL DEFAULT '10000',
-  `algorithm` tinyint(4) DEFAULT '0' COMMENT '0:默认递增;1:32位递增;2:64位递增;2:SnowflakeId',
+  `algorithm` tinyint(4) DEFAULT '0' COMMENT '0:默认递增;1:32位递增;2:64位递增;2:Snowflake',
   PRIMARY KEY (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

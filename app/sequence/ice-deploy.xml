@@ -5,8 +5,8 @@
             <parameter name="index" default="0"/>
             <parameter name="endpoints"/>
             <parameter name="order-endpoints"/>
-            <icebox id="sequences.SequenceServiceSvr${index}-V1" activation="always" exe="icebox" pwd="/home/yuhui/tddl_sequence${index}">
-                <env>LD_LIBRARY_PATH=.:lib:/usr/local/thirdparty/glog/lib:/home/yuhui/Ice-3.6.3/lib64:/usr/local/zkclient/lib:$LD_LIBRARY_PATH</env>
+            <icebox id="sequences.SequenceServiceSvr${index}-V1" activation="always" exe="icebox" pwd="/home/demo/tddl_sequence${index}">
+                <env>LD_LIBRARY_PATH=.:lib:/usr/local/thirdparty/glog/lib:/usr/local/Ice-3.6.3/lib64:/usr/local/zkclient/lib:$LD_LIBRARY_PATH</env>
                 <env>seq.configFile=conf/sequence.properties</env>
                 <properties>
                     <properties refid="MultiThreaded"/>
@@ -50,8 +50,8 @@
             <property name="Ice.BackgroundLocatorCacheUpdates" value="1"/>
         </properties>
         <node name="glacier2test">
-            <server-instance index="0" endpoints="tcp -p 9000" order-endpoints="tcp -p 9001" template="SequenceServiceTemplate" />
-            <server-instance index="1" endpoints="tcp -p 9002" order-endpoints="tcp -p 9003" template="SequenceServiceTemplate" />
+            <server-instance index="0" endpoints="tcp" order-endpoints="tcp" template="SequenceServiceTemplate" />
+            <server-instance index="1" endpoints="tcp" order-endpoints="tcp" template="SequenceServiceTemplate" />
         </node>
     </application>
 </icegrid>
