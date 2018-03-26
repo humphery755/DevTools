@@ -2,8 +2,8 @@
 # The client reads this property to create the reference to the
 # "hello" object in the server.
 #
-tddl.sequences.SequenceService=tddl.sequences.SequenceService:tcp -h localhost -p 11111 -t 30000
-tddl.sequences.OrderSequenceService=tddl.sequences.OrderSequenceService:tcp -h localhost -p 11111 -t 30000
+#tddl.sequences.SequenceService=tddl.sequences.SequenceService:tcp -h localhost -p 11111 -t 30000
+#tddl.sequences.OrderSequenceService=tddl.sequences.OrderSequenceService:tcp -h localhost -p 11111 -t 30000
 #tddl.sequences.OrderSequenceService-V1=ExtIce.TEST.Router/tddl.sequences.OrderSequenceService-V1
 #tddl.sequences.SequenceService-V1=ExtIce.TEST.Router/tddl.sequences.SequenceService-V1
 #
@@ -11,7 +11,7 @@ tddl.sequences.OrderSequenceService=tddl.sequences.OrderSequenceService:tcp -h l
 #
 app.ver=
 
-Ice.Default.Locator=DemoIceGrid/Locator:tcp -h 192.168.1.1 -p 4066
+Ice.Default.Locator=DemoIceGrid/Locator:tcp -h 192.168.1.11 -p 4066
 #Ice.Default.Router=DemoGlacier2/router:tcp -h 192.168.1.2 -p 5064|test/passwd
 #ExtIce.TEST.Router=DemoGlacier2/router:tcp -h 192.168.1.2 -p 5064|T1/passwd
 #ExtIce.TEST1.Router=DemoGlacier2/router:tcp -h 192.168.1.2 -p 5064|T2/passwd

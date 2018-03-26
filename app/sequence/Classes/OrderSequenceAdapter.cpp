@@ -185,7 +185,7 @@ static void unregister_4_registry(){
     pthread_mutex_unlock(&lock);
 }
 
-void startOrderSequence(const Ice::CommunicatorPtr& _communicator, Ice::PropertiesPtr& _prop,IceClientUtil *_clientUtil){
+void startOrderSequence(const Ice::CommunicatorPtr& _communicator, Ice::PropertiesPtr& _prop){
     string strHosts = _prop->getPropertyWithDefault("seq.zookeeper.hosts","");
     if(strHosts.length()<5){
         LOG(ERROR) << ADAPTER_NAME <<" has not been registered: " << "seq.zookeeper.hosts is null";

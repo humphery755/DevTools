@@ -26,7 +26,7 @@ public:
         pthread_mutex_unlock(m);  
     }
 };
-void startOrderSequence(const Ice::CommunicatorPtr& communicator, Ice::PropertiesPtr& prop,IceExt::IceClientUtil *clientUtil);
+void startOrderSequence(const Ice::CommunicatorPtr& communicator, Ice::PropertiesPtr& prop);
 void stopOrderSequence();
 
 #endif

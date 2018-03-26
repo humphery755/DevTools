@@ -35,7 +35,6 @@ ICE_DECLSPEC_EXPORT IceBox::Service* create(Ice::CommunicatorPtr)
 //#define ngx_trylock(lock)  (*(lock) == 0 && __sync_bool_compare_and_swap(lock, 0, 1))
 //#define ngx_unlock(lock)    *(lock) = 0
 char version[50];
-static IceClientUtil *clientUtil = new IceClientUtil("sequence","conf/config.client");
 
 SequenceServiceIcebox::SequenceServiceIcebox(){}
 
@@ -50,7 +49,7 @@ static void initGlog(Ice::PropertiesPtr& prop){
 	int maxLogSize = prop->getPropertyAsIntWithDefault("glog.maxLogSize",1000);
 	int logbufsecs = prop->getPropertyAsIntWithDefault("glog.logbufsecs",30);
 
-	google::InitGoogleLogging(clientUtil->getAppName().c_str());
+	google::InitGoogleLogging("sequence");
 	ostringstream log_dest_stream;
 	log_dest_stream<<logdir<<"info";
 	google::SetLogDestination(google::GLOG_INFO,log_dest_stream.str().c_str());
@@ -104,17 +103,13 @@ SequenceServiceIcebox::start(const string& _name, const Ice::CommunicatorPtr& co
 	if(!multidb::MySQLDBPool::GetMySQLPool()->Startup())return;
 	LOG(INFO) <<  "MySQLDBPool startup success.";
 
-	if(clientUtil->initialize()!=0){
-		LOG(INFO) <<  "IceClientUtil->initialize() failured.";
-	}
-
 	_communicator=communicator;	
 	ostringstream name_stream;
 	name_stream << _name << version;
 	LOG(INFO) << "start createAdapter: " << name_stream.str();
 	_adapter = communicator->createObjectAdapter(name_stream.str());
 
-	startOrderSequence(communicator, prop,clientUtil);
+	startOrderSequence(communicator, prop);
 	int workerId = prop->getPropertyAsInt("seq.workerId");
 	int datacenterId = prop->getPropertyAsInt("seq.datacenterId");
 	tddl::sequences::SequenceServicePtr seqSvc = new SequenceServiceI(workerId,datacenterId);
@@ -132,6 +127,5 @@ SequenceServiceIcebox::stop()
 	
 	multidb::MySQLDBPool::GetMySQLPool()->ReleaseAll();
 
-	clientUtil->destroy();
 	google::ShutdownGoogleLogging();
 }

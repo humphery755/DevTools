@@ -143,4 +143,3 @@ SequenceRange SequenceServiceI::nextValue(const ::std::string& name, ::Ice::Int 
 	LOG(ERROR)  << "Retried too many times, retryTimes = "<<retryTimes;
 	throw SequenceException("Retried too many times, retryTimes");
 }
-

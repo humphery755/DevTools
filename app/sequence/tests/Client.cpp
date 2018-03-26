@@ -238,21 +238,15 @@ void initGlog(){
 }
 
 int main(int argc, char** argv) {
-  
-  initGlog();
-  if(
-  clientUtil->initialize()!=0)return 1;
-  //Ice::RouterPrx defaultRouter = clientUtil->communicator()->getDefaultRouter();
-  //Glacier2::RouterPrx router = Glacier2::RouterPrx::checkedCast(defaultRouter);
-  //clientUtil->communicator()->setDefaultRouter(router);
-  /*
-
-
-*/
   if(argc>1){
     char *strTh=argv[1];
     threads=atoi(strTh);
   }
+
+  initGlog();
+  if(clientUtil->initialize()!=0)return 1;
+
+ 
 if(1==0){
   string verkey="app.ver";
   string strVersion = clientUtil->getProperty(verkey,EMPTY_STRING);
