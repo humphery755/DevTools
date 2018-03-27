@@ -55,9 +55,8 @@ inline static int64_t timeGen(const int64_t lastTimestamp){
 	struct timeval tv;
     gettimeofday(&tv,0);
 	timestamp=(uint64_t)tv.tv_sec*1000 + (uint64_t)tv.tv_usec/1000;
-	//LOG(INFO) << timestamp<<":"<<lastTimestamp;
 	if (timestamp < lastTimestamp) {
-		LOG(ERROR) << "xxxxxxxxxxxxxxxxxxx: "<< timestamp<<":"<<lastTimestamp;
+		LOG(ERROR) << "Anti race condition sec fix: "<< timestamp<<":"<<lastTimestamp;
 		
 		time_t      tv_sec;
 		tv_sec = time(NULL);
@@ -128,11 +127,8 @@ int SnowflakeIdWorker::getAndIncrement(int step,tddl::sequences::SequenceRange& 
 	int64_t timestamp,timestamp1,tmpSeq;
 	int minSeq,maxSeq,min2Seq=-1;//,max2Seq;
 	{
-		Lock(&this->lock);
-		//do{
-			timestamp = timeGen(lastTimestamp);
-		//} while (timestamp < lastTimestamp);
-		//timestamp = timeGen(lastTimestamp);
+		Lock lock(&this->lock);
+		timestamp = timeGen(lastTimestamp);
 		//如果当前时间小于上一次ID生成的时间戳，说明系统时钟回退过这个时候应当抛出异常
 		if (timestamp < lastTimestamp) {
 			stringstream message;  

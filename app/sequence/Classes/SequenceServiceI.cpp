@@ -26,7 +26,7 @@ using namespace tddl::sequences;
 #define INCREMENT32 1
 #define SNOW_FLAKE 3
 
-static int retryTimes=100;
+static int retryTimes=3;
 
 
 static int getAlgorithmCfg(string name){
@@ -78,21 +78,19 @@ SequenceRange SequenceServiceI::nextValue(const ::std::string& name, ::Ice::Int 
 {
 	LOG(INFO) << __FUNCTION__ << "(seqName:=" << name << ", step:=" << step << ")";
 	SequenceWorker *currentRange = NULL;
-
-	if(pthread_rwlock_rdlock(&rangeLock)!=0){
-		LOG(ERROR) << "can't get rdlock.";
-		throw SequenceException("SystemError");
+	map<string, SequenceWorker*>::iterator p;
+	{
+		RLock lock(&this->rangeLock);
+		p = rangeMap.find(name);
+		if (p != rangeMap.end()) {
+			currentRange = (SequenceWorker*)p->second;
+		}
 	}
-	map<string, SequenceWorker*>::iterator p = rangeMap.find(name);	
-	if (p != rangeMap.end()) {
-		currentRange = (SequenceWorker*)p->second;
-	}
-	pthread_rwlock_unlock(&rangeLock);
 	if (currentRange == NULL){
 		//每个序列第一次使用时需进行初始化SequenceRangeI，并缓存至rangeMap
 		
 		//申请写锁
-		WLock(&this->rangeLock);
+		WLock lock(&this->rangeLock);
 		//这里再次进行是否存在判断，确保并发时只会进行一次初始化
 		p = rangeMap.find(name);	
 		if (p != rangeMap.end()) {
@@ -138,8 +136,8 @@ SequenceRange SequenceServiceI::nextValue(const ::std::string& name, ::Ice::Int 
 			LOG(INFO) << "return SequenceRange{max="<< retSeqRange.max<<", min="<<retSeqRange.min<<"}";
 			return retSeqRange;
 		}
-		VLOG_EVERY_N(1, 10) << name<< ": currentRange->getAndIncrement failed";		
+		VLOG_EVERY_N(1, 10) << name<< ": currentRange->getAndIncrement failed";	
 	}
 	LOG(ERROR)  << "Retried too many times, retryTimes = "<<retryTimes;
-	throw SequenceException("Retried too many times, retryTimes");
+	throw SequenceException("Retried too many times");
 }

@@ -30,17 +30,16 @@ SequenceWorker *currentRange;
 
 /**
  * 查看重复脚本
- * perl -n -e 'if ( /^\s*$/){print; next};if (exists($hash{$_})) { print } else { $hash{$_}=1; next }' logs/test_Default.INFO
+ * perl -n -e 'if ( /^\s*$/){print; next}; $v=substr($_,-37); if (exists($hash{$v})) { print } else { $hash{$v}=1; next }' logs/test_Default.INFO
  */
 static void BM_HelloService_echo(benchmark::State& state) {
-
-  if (state.thread_index == 0) {}
 
 	tddl::sequences::SequenceRange retSeqRange;
   while (state.KeepRunning()) {    
     try
     {
       currentRange->getAndIncrement(5,retSeqRange);
+      if(retSeqRange.min>0)
       LOG(INFO) << "min="<<retSeqRange.min<<", max="<<retSeqRange.max;
     } 
     catch (const SequenceException& ex) {
@@ -62,7 +61,7 @@ static void BM_HelloService_echo(benchmark::State& state) {
   state.SetBytesProcessed(int64_t(state.iterations()) *int64_t(state.range(0)));
   //delete[] src;
   
-  if (state.thread_index == 0) {}
+
 }
 
 //BENCHMARK(BM_MultiThreaded)->Threads(2);
@@ -108,14 +107,16 @@ int main(int argc, char** argv) {
     threads=atoi(strTh);
   }
   
-  if(!multidb::MySQLDBPool::GetMySQLPool()->RegistDataBase(0,"admin/admin@192.168.1.12:3306/uhome",32,threads<<9))return 1;
+  if(!multidb::MySQLDBPool::GetMySQLPool()->RegistDataBase(0,"uhome/uhome110@192.168.1.12:3306/uhome",32,threads<<9))return 1;
   if(!multidb::MySQLDBPool::GetMySQLPool()->Startup())return 1;
 
   
 
   err_total=0;
-  currentRange = new DefaultSequenceWorker("SEQ_TEST",0,3,32);
+  currentRange = new DefaultSequenceWorker("SEQ_TEST",0,0,0);
 
+  //BENCHMARK(BM_HelloService_echo)->Arg(0);
+ 
   BENCHMARK_XXX(threads<<1,0)
   BENCHMARK_XXX(threads<<2,0)
   BENCHMARK_XXX(threads<<3,0)
@@ -124,8 +125,9 @@ int main(int argc, char** argv) {
   BENCHMARK_XXX(threads<<6,0)
   BENCHMARK_XXX(threads<<7,0)
   BENCHMARK_XXX(threads<<8,0)
-
+ /**/
   ::benchmark::Initialize(&argc, argv);
+  while(1)
   ::benchmark::RunSpecifiedBenchmarks();
 
 	google::ShutdownGoogleLogging();

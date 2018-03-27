@@ -52,6 +52,10 @@ static void BM_HelloService_echo(benchmark::State& state) {
 }
 */
 
+/**
+ * 查看重复脚本
+ * perl -n -e 'if ( /^\s*$/){print; next}; $v=substr($_,-188); if (exists($hash{$v})) { print } else { $hash{$v}=1; next }' logs/test_SnowflakeId.INFO
+ */
 static void BM_HelloService_echo(benchmark::State& state) {
 
 	tddl::sequences::SequenceRange retSeqRange;

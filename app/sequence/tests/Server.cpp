@@ -95,8 +95,8 @@ Server::run(int argc, char*[])
 	int datacenterId = prop->getPropertyAsInt("seq.datacenterId");
 
     Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("tddl.sequences.SequenceService");
-	tddl::sequences::SequenceServicePtr seqService = new tddl_sequence_SequenceServiceI(workerId,datacenterId);
-	tddl::sequences::SequenceServicePtr orderSequence = new tddl_sequence_SequenceServiceI(workerId,datacenterId);
+	tddl::sequences::SequenceServicePtr seqService = new SequenceServiceI(workerId,datacenterId);
+	tddl::sequences::SequenceServicePtr orderSequence = new SequenceServiceI(workerId,datacenterId);
     //Demo::PricingEnginePtr pricing = new PricingI(properties->getPropertyAsList("Currencies"));
     adapter->add(seqService, communicator()->stringToIdentity("tddl.sequences.SequenceService"));
 	adapter->add(orderSequence, communicator()->stringToIdentity("tddl.sequences.OrderSequenceService"));

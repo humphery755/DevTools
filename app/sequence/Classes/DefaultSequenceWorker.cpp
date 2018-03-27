@@ -36,7 +36,6 @@ const static unsigned int sequenceBits64 = 61 - datacenterIdBits64;
 
 
 static long DELTA = 100000000L;
-int retryTimes=150;
 std::string tableName="t_sequence";
 
 inline char *my_strchr(const char *str,char ch)
@@ -58,6 +57,7 @@ void nextRange(string name,DefaultSequenceWorker* out){
 		LOG(ERROR) << "sequence name can't null";
 		throw SequenceException("sequence name can't null");
 	}
+	
 	//if(1==1)return;
 	//从线程池中取出连接（活动连接数＋1）  
 	multidb::Connection *con = multidb::MySQLDBPool::GetMySQLPool()->GetConnection(0);
@@ -81,7 +81,7 @@ void nextRange(string name,DefaultSequenceWorker* out){
 			// str =  value,step,isrpc
 			string tmpstr=pstrm.m_res->getString(1);
 			char *p,*pstr=(char*)tmpstr.c_str();
-			pstr[tmpstr.size()-1]='\0';
+			//pstr[tmpstr.size()]='\0';
 			p = my_strchr(pstr,',');
 			if(p) {
 				*p='\0';
@@ -123,9 +123,8 @@ void nextRange(string name,DefaultSequenceWorker* out){
 	throw SequenceException("System Error");
 }
 
-
 DefaultSequenceWorker::DefaultSequenceWorker(string name, unsigned int workerId, unsigned int datacenterId,int seqBits):SequenceWorker(name,workerId,datacenterId)
-{	
+{
 	switch(seqBits){
 		case 32:
 		datacenterIdMask32 = datacenterId << sequenceBits32; //32位序列 - 数据标识向左移22位
@@ -155,10 +154,13 @@ DefaultSequenceWorker::DefaultSequenceWorker(string name, unsigned int workerId,
 	this->max=0;
 	this->step=0;
 	this->seqBits=seqBits;
-	
+
+	pthread_rwlock_init(&lock,NULL);
+
 	nextRange(name,this);
 }
 DefaultSequenceWorker::~DefaultSequenceWorker(){
+	pthread_rwlock_destroy(&lock);
 }
 
 static inline int addAndIncrement(int step,DefaultSequenceWorker *worker,tddl::sequences::SequenceRange& sr){
@@ -178,21 +180,17 @@ static inline int addAndIncrement(int step,DefaultSequenceWorker *worker,tddl::s
 }
 
 int DefaultSequenceWorker::getAndIncrement(int step,tddl::sequences::SequenceRange& sr){
+	sr.min=0;
+	sr.max=0;
 	int retv;
-	if(this->value>=this->max){
-		Lock(&this->lock);
+	{
+		RLock lock(&this->lock);
+		retv = addAndIncrement(step,this,sr);
+	}	
+	if(retv!=0){
+		WLock lock(&this->lock);
 		if(this->value>=this->max){
 			nextRange(name,this);
-		}
-	}
-
-	retv = addAndIncrement(step,this,sr);
-	if(retv!=0){
-		{
-			Lock(&this->lock);
-			if(this->value>=this->max){
-				nextRange(name,this);
-			}
 		}
 		retv = addAndIncrement(step,this,sr);
 	}
@@ -207,7 +205,6 @@ int DefaultSequenceWorker::getAndIncrement(int step,tddl::sequences::SequenceRan
 			sr.min=datacenterIdMask64|sr.min;
 			sr.max=datacenterIdMask64|sr.max;
 			break;
-			case 0:
 			default:
 			break;
 		}

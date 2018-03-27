@@ -21,8 +21,7 @@ class Lock
 private:
 	pthread_mutex_t *lock;
 public:
-	Lock(pthread_mutex_t *l){
-		lock=l;
+	Lock(pthread_mutex_t *l):lock(l){
 		if(pthread_mutex_lock(lock)!=0){
 			LOG(ERROR) << "can't get lock.";
 			throw tddl::sequences::SequenceException("SystemError: can't get lock");
@@ -36,14 +35,27 @@ class WLock
 private:
 	pthread_rwlock_t *lock;
 public:
-	WLock(pthread_rwlock_t *l){
-		lock=l;
+	WLock(pthread_rwlock_t *l):lock(l){
 		if(pthread_rwlock_wrlock(lock)!=0){
-			LOG(ERROR) << "can't get rwlock.";
+			LOG(ERROR) << "can't get wrlock.";
 			throw tddl::sequences::SequenceException("SystemError: can't get rwlock");
 		}
 	}
 	virtual ~WLock(){pthread_rwlock_unlock(lock);}
+};
+
+class RLock
+{
+private:
+	pthread_rwlock_t *lock;
+public:
+	RLock(pthread_rwlock_t *l):lock(l){
+		if(pthread_rwlock_rdlock(lock)!=0){
+			LOG(ERROR) << "can't get rwlock.";
+			throw tddl::sequences::SequenceException("SystemError: can't get rdlock");
+		}
+	}
+	virtual ~RLock(){pthread_rwlock_unlock(lock);}
 };
 
 class SequenceWorker{
@@ -81,12 +93,11 @@ public:
 	DefaultSequenceWorker(std::string name, unsigned int workerId, unsigned int datacenterId,int seqBits);
 	virtual ~DefaultSequenceWorker();
 	int getAndIncrement(int step,tddl::sequences::SequenceRange&);
-	//int64_t 			min;
-	int64_t 			max;
+
+	volatile int64_t 	max;
 	volatile int64_t 	value;
 	/** 生成序列的位数 */
 	int 				seqBits;
-	pthread_mutex_t 	lock = PTHREAD_MUTEX_INITIALIZER;
 private:
 	/** 数据ID在64位序列中的掩码 */
 	uint64_t		datacenterIdMask64;
@@ -95,6 +106,7 @@ private:
 
 	/** 支持的最大数据标识id，结果是31 */
 	unsigned int 	maxDatacenterId;
+	pthread_rwlock_t lock;
 };
 
 /**
