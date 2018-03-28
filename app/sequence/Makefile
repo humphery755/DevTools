@@ -4,7 +4,6 @@
 #g++ -shared -rdynamic -m64 -fvisibility=hidden -Wall -Werror -pthread -fPIC -g -L/home/humphery/tmp/ice-3.6.3/cpp/lib64 -o libtdd_sequence_SequenceServiceI.so -Wl,-h,libtdd_sequence_SequenceServiceI.so   generated/tdd_sequence.o Classes/tdd_sequence_SequenceServiceI.o -lIceBox  -lIce -lIceUtil
 # **********************************************************************
 MYSQL_HOME=/usr/local/mysqlconnector
-UNIXODBC_HOME=/usr/local/unixODBC
 THIRDPARTY_HOME=/usr/local/thirdparty
 BENCHMARK_HOME=/usr/local/benchmark
 ICE_HOME=$(HOME)/Ice-3.6.3
@@ -74,10 +73,8 @@ dbpool: $(TEST_DBPool_OBJS)
 	-L $(BENCHMARK_HOME)/lib -L$(GLOG_HOME)/lib -L$(MYSQL_HOME)/lib -lmysqlcppconn -lglog -lpthread -lbenchmark -o test
 	LD_LIBRARY_PATH=.:$(BENCHMARK_HOME)/lib:$(MYSQL_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH) ./test 1 --benchmark_counters_tabular=true
 
-otl:
-	g++ -g -IClasses tests/otlmain.cpp \
-	-I$(UNIXODBC_HOME)/include -L$(UNIXODBC_HOME)/lib -lmyodbc5w -lodbc -lodbcinst -o otltest
-	LD_LIBRARY_PATH=.:$(UNIXODBC_HOME)/lib:$(LD_LIBRARY_PATH) ./otltest
+tools:
+	g++ -g tests/SeqTools.cpp -o tools
 
 ####### Compile
 $(OBJ_DIR)/%.o: ../%.cpp $(CORE_MAKEFILE_LIST)

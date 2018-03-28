@@ -65,7 +65,7 @@ inline static int64_t timeGen(const int64_t lastTimestamp){
 		* a second to the tv_sec.
 		*/		
 		if (tv.tv_sec % 10 != tv_sec % 10)
-			tv.tv_sec++;		
+			tv.tv_sec++;
 
 		timestamp=tv.tv_sec*1000 + tv.tv_usec/1000;
 		

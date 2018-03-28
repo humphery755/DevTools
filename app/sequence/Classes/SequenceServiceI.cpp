@@ -117,7 +117,8 @@ SequenceRange SequenceServiceI::nextValue(const ::std::string& name, ::Ice::Int 
 					currentRange = new DefaultSequenceWorker(name,workerId,datacenterId,32);
 					break;
 				case SNOW_FLAKE:
-					currentRange = new SnowflakeIdWorker(name,workerId,datacenterId);
+					//workerId,datacenterId合二为一
+					currentRange = new SnowflakeIdWorker(name,workerId,-1);
 					break;
 				default:
 					LOG(ERROR) << "Unknown Sequence Algorithm config:"<<algorithm;
