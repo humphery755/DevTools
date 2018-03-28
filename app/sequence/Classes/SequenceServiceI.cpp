@@ -63,7 +63,7 @@ static int getAlgorithmCfg(string name){
 }
 
 
-SequenceServiceI::SequenceServiceI(unsigned int workerId, unsigned int datacenterId)
+SequenceServiceI::SequenceServiceI(unsigned int workerId, int datacenterId)
 {
 	pthread_rwlock_init(&rangeLock,NULL);
 	this->workerId = workerId;
@@ -76,7 +76,7 @@ SequenceServiceI::~SequenceServiceI(){
 
 SequenceRange SequenceServiceI::nextValue(const ::std::string& name, ::Ice::Int step, const ::Ice::Current&)
 {
-	LOG(INFO) << __FUNCTION__ << "(seqName:=" << name << ", step:=" << step << ")";
+	//LOG(INFO) << __FUNCTION__ << "(seqName:=" << name << ", step:=" << step << ")";
 	SequenceWorker *currentRange = NULL;
 	map<string, SequenceWorker*>::iterator p;
 	{
@@ -129,15 +129,17 @@ SequenceRange SequenceServiceI::nextValue(const ::std::string& name, ::Ice::Int 
 
 	tddl::sequences::SequenceRange retSeqRange;	
 	//序列取完后向数据库重新申请序列取值范围，如失败则进行重试
-	for(int i=retryTimes;i>=0;i--){
+	int i=retryTimes;
+	do{
 		//告警日志，每超过10即输出一条日志
 		int value = currentRange->getAndIncrement(step,retSeqRange);
 		if(value==0){
-			LOG(INFO) << "return SequenceRange{max="<< retSeqRange.max<<", min="<<retSeqRange.min<<"}";
+			LOG(INFO) << "SequenceRange{max="<< retSeqRange.max<<", min="<<retSeqRange.min<<"}";
 			return retSeqRange;
 		}
 		VLOG_EVERY_N(1, 10) << name<< ": currentRange->getAndIncrement failed";	
-	}
+		i--;
+	}while(i>=0);
 	LOG(ERROR)  << "Retried too many times, retryTimes = "<<retryTimes;
 	throw SequenceException("Retried too many times");
 }

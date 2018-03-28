@@ -123,7 +123,7 @@ void nextRange(string name,DefaultSequenceWorker* out){
 	throw SequenceException("System Error");
 }
 
-DefaultSequenceWorker::DefaultSequenceWorker(string name, unsigned int workerId, unsigned int datacenterId,int seqBits):SequenceWorker(name,workerId,datacenterId)
+DefaultSequenceWorker::DefaultSequenceWorker(string name, unsigned int workerId, int datacenterId,int seqBits):SequenceWorker(name,workerId,datacenterId)
 {
 	switch(seqBits){
 		case 32:
@@ -144,7 +144,7 @@ DefaultSequenceWorker::DefaultSequenceWorker(string name, unsigned int workerId,
 		break;
 	}
 
-	if (datacenterId > maxDatacenterId || datacenterId < 0) {
+	if ((unsigned int)datacenterId > maxDatacenterId || datacenterId < 0) {
 		stringstream message;  
 		message <<"datacenter Id can't be greater than " << maxDatacenterId <<" or less than 0";
 		throw SequenceException(message.str());

@@ -21,6 +21,8 @@ exception SequenceException{
 struct SequenceRange{
 	long min;
 	long max;
+	//long min2;
+	//long max2;
 };
 
 interface SequenceService {

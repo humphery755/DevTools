@@ -195,7 +195,7 @@ int test(){
   ctx["tId"] = "xxxxx";
   ctx["rId"] = "1";
 
-  string seq_name="TEST_4";//SEQ_TEST_1
+  string seq_name="TEST_3";//SEQ_TEST_1
   try{
     seqRange=orderSequence->nextValue(seq_name,5,ctx);
     cout << "max: "<<seqRange.max<<", min: "<<seqRange.min<<endl;
@@ -248,7 +248,7 @@ int main(int argc, char** argv) {
   if(clientUtil->initialize()!=0)return 1;
 
  
-if(1==0){
+if(1==1){
   string verkey="app.ver";
   string strVersion = clientUtil->getProperty(verkey,EMPTY_STRING);
   string s="tddl.sequences.SequenceService";

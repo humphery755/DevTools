@@ -62,7 +62,7 @@ static void BM_HelloService_echo(benchmark::State& state) {
   while (state.KeepRunning()) {    
     try
     {
-      currentRange->getAndIncrement(1,retSeqRange);
+      currentRange->getAndIncrement(4095,retSeqRange);
       LOG(INFO) << "min="<<retSeqRange.min<<", max="<<retSeqRange.max;
     } 
     catch (const SequenceException& ex) {
@@ -128,7 +128,7 @@ int main(int argc, char** argv) {
   }
 
   err_total=0;
-  currentRange = new SnowflakeIdWorker("SEQ_TX",0,0);
+  currentRange = new SnowflakeIdWorker("SEQ_TX",1023,-1);
 
 
   BENCHMARK_XXX(threads<<1,0)

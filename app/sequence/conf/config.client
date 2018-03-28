@@ -2,8 +2,8 @@
 # The client reads this property to create the reference to the
 # "hello" object in the server.
 #
-#tddl.sequences.SequenceService=tddl.sequences.SequenceService:tcp -h localhost -p 11111 -t 30000
-#tddl.sequences.OrderSequenceService=tddl.sequences.OrderSequenceService:tcp -h localhost -p 11111 -t 30000
+tddl.sequences.SequenceService=tddl.sequences.SequenceService:tcp -h localhost -p 11111 -t 30000
+tddl.sequences.OrderSequenceService=tddl.sequences.OrderSequenceService:tcp -h localhost -p 11111 -t 30000
 #tddl.sequences.OrderSequenceService-V1=ExtIce.TEST.Router/tddl.sequences.OrderSequenceService-V1
 #tddl.sequences.SequenceService-V1=ExtIce.TEST.Router/tddl.sequences.SequenceService-V1
 #

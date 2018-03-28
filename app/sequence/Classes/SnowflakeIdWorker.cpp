@@ -7,15 +7,12 @@
 
 #include <Ice/Ice.h>
 #include <SequenceServiceI.h>
-#include <Freeze/Freeze.h>
 #include <stdio.h>
 #include <string>  
 #include <sstream>  
 #include <iostream>
 #include <sys/time.h>
 #include <glog/logging.h>
-
-#include <city.h>
 
 using namespace std;
 using namespace tddl::sequences;
@@ -30,7 +27,7 @@ const static unsigned int workerIdBits = 5;
 const static unsigned int datacenterIdBits = 5;
 
 /** 支持的最大机器id，结果是31 (这个移位算法可以很快的计算出几位二进制数所能表示的最大十进制数) */
-const static unsigned int maxWorkerId = -1 ^ (-1 << workerIdBits);
+static unsigned int maxWorkerId = -1 ^ (-1 << workerIdBits);
 
 /** 支持的最大数据标识id，结果是31 */
 const static unsigned int maxDatacenterId = -1 ^ (-1 << datacenterIdBits);
@@ -60,14 +57,13 @@ inline static int64_t timeGen(const int64_t lastTimestamp){
 		
 		time_t      tv_sec;
 		tv_sec = time(NULL);
-		/* Anti race condition sec fix
+		/* Anti race condition sec fix @link http://gynvael.coldwind.pl/?id=82
 		* When the milliseconds are at 999 at the time of call to time(), and at 
 		* 999+1 = 0 at the time of the GetLocalTime call, then the tv_sec and
 		* tv_usec would be set to one second in the past. To correct this, just
 		* check if the last decimal digit of the seconds match, and if not, add
 		* a second to the tv_sec.
-		*/
-		
+		*/		
 		if (tv.tv_sec % 10 != tv_sec % 10)
 			tv.tv_sec++;		
 
@@ -93,16 +89,20 @@ inline static int64_t tilNextMillis(const int64_t lastTimestamp) {
 	return timestamp;
 }
 
-SnowflakeIdWorker::SnowflakeIdWorker(string name, unsigned int workerId, unsigned int datacenterId):SequenceWorker(name,workerId,datacenterId){
-	if (workerId > maxWorkerId || workerId < 0) {
+SnowflakeIdWorker::SnowflakeIdWorker(string name, unsigned int workerId, int datacenterId):SequenceWorker(name,workerId,datacenterId){
+	//datacenterId小于零时表示该位不启用，workerId调整为：workerIdBits+datacenterIdBits=10
+	if(datacenterId < 0){
+		maxWorkerId = -1 ^ (-1 << (workerIdBits+datacenterIdBits));
+	}else if ((unsigned int)datacenterId > maxDatacenterId) {
 		stringstream message;  
-		message <<"worker Id can't be greater than " << maxWorkerId <<" or less than 0";
+		message <<"datacenter Id can't be greater than " << maxDatacenterId <<" or less than 0";
 		LOG(ERROR) << message.str();
 		throw SequenceException(message.str());
 	}
-	if (datacenterId > maxDatacenterId || datacenterId < 0) {
+
+	if (workerId > maxWorkerId || workerId < 0) {
 		stringstream message;  
-		message <<"datacenter Id can't be greater than " << maxDatacenterId <<" or less than 0";
+		message <<"worker Id can't be greater than " << maxWorkerId <<" or less than 0";
 		LOG(ERROR) << message.str();
 		throw SequenceException(message.str());
 	}
@@ -111,8 +111,7 @@ SnowflakeIdWorker::SnowflakeIdWorker(string name, unsigned int workerId, unsigne
 	this->lastTimestamp=0;
 }
 
-SnowflakeIdWorker::~SnowflakeIdWorker(){
-}
+SnowflakeIdWorker::~SnowflakeIdWorker(){}
 
 int SnowflakeIdWorker::getAndIncrement(int step,tddl::sequences::SequenceRange& sr){
 	//入参校验
@@ -125,7 +124,8 @@ int SnowflakeIdWorker::getAndIncrement(int step,tddl::sequences::SequenceRange& 
 	//sr.min2 = 0;
 	//sr.max2 = 0;
 	int64_t timestamp,timestamp1,tmpSeq;
-	int minSeq,maxSeq,min2Seq=-1;//,max2Seq;
+	unsigned int minSeq,maxSeq;//,max2Seq;
+	int min2Seq=-1;
 	{
 		Lock lock(&this->lock);
 		timestamp = timeGen(lastTimestamp);
@@ -141,24 +141,25 @@ int SnowflakeIdWorker::getAndIncrement(int step,tddl::sequences::SequenceRange& 
 		//如果是同一时间生成的，则进行毫秒内序列
 		if (lastTimestamp == timestamp) {
 			minSeq= sequence+1;
-			sequence = (sequence + step) & sequenceMask;
+			sequence = (sequence + step);
 			//毫秒内序列溢出
-			if (sequence == 0) {
+			if (sequence > sequenceMask) {
 				//阻塞到下一个毫秒,获得新的时间戳
 				timestamp = tilNextMillis(lastTimestamp);
-				if((minSeq&sequenceMask)==0){
+				if(minSeq > sequenceMask){
 					minSeq=0;
 					sequence = step-1;
 					maxSeq= sequence;
 					timestamp1 = timestamp;
 					LOG(INFO) << "timestamp="<< timestamp1<<": min="<<minSeq<<", max="<<maxSeq;
 				}else{
-					maxSeq= sequenceMask-1;
-					timestamp1 = lastTimestamp;
-					sequence = step;
+					maxSeq= sequenceMask;
+					timestamp1 = lastTimestamp;					
 					min2Seq = 0;
-					LOG(INFO) << "timestamp="<< timestamp1<<": min="<<minSeq<<", max="<<maxSeq;
-					//max2Seq = step;
+					sequence=0;
+					//sequence = step-(maxSeq-minSeq);
+					//max2Seq = sequence;
+					LOG(INFO) << "timestamp="<< timestamp1<<": min="<<minSeq<<", max="<<maxSeq;	// <<", min2="<<min2Seq<<", max2="<<max2Seq;				
 				}				
 			}else{
 				timestamp1 = timestamp;
@@ -167,10 +168,10 @@ int SnowflakeIdWorker::getAndIncrement(int step,tddl::sequences::SequenceRange& 
 			}
 		}
 		//时间戳改变，毫秒内序列重置
-		else {
-			sequence = 0;
-			minSeq = sequence;
+		else {			
+			minSeq = 0;
 			maxSeq = step-1;
+			sequence = maxSeq;
 			timestamp1 = timestamp;
 			LOG(INFO) << "lastTimestamp="<<lastTimestamp<<",timestamp="<< timestamp1<<": min="<<minSeq<<", max="<<maxSeq;
 		}
@@ -178,12 +179,14 @@ int SnowflakeIdWorker::getAndIncrement(int step,tddl::sequences::SequenceRange& 
 		lastTimestamp = timestamp;
 	}
 	//移位并通过或运算拼到一起组成64位的ID
-	tmpSeq = ((timestamp1 - twepoch) << timestampLeftShift) //
-			| (datacenterId << datacenterIdShift) //
-			| (workerId << workerIdShift);
+	if(datacenterId<0){
+		tmpSeq = ((timestamp1 - twepoch) << timestampLeftShift) | (workerId << workerIdShift);
+	}else{
+		tmpSeq = ((timestamp1 - twepoch) << timestampLeftShift) | (datacenterId << datacenterIdShift) | (workerId << workerIdShift);
+	}
 	sr.min= tmpSeq | minSeq;
 	sr.max= tmpSeq | maxSeq;
-	LOG(INFO) << "tmpSeq="<< tmpSeq<<": min="<<sr.min<<", max="<<sr.max<<",twepoch="<<twepoch<<",timestampLeftShift="<<timestampLeftShift<<",datacenterId="<<datacenterId<<",datacenterIdShift="<<datacenterIdShift<<",workerId="<<workerId<<",workerIdShift="<<workerIdShift;
+	//LOG(INFO) << "tmpSeq="<< tmpSeq<<": min="<<sr.min<<", max="<<sr.max<<",twepoch="<<twepoch<<",timestampLeftShift="<<timestampLeftShift<<",datacenterId="<<datacenterId<<",datacenterIdShift="<<datacenterIdShift<<",workerId="<<workerId<<",workerIdShift="<<workerIdShift;
 	if(min2Seq==-1){
 		return 0;
 	}
