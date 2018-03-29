@@ -104,11 +104,11 @@ private:
 	uint32_t		datacenterIdMask32;
 
 	/** 支持的最大数据标识id，结果是31 */
-	unsigned int 	maxDatacenterId;
+	unsigned int 	 maxDatacenterId;
 	pthread_rwlock_t lock;
 
 	/** 生成序列的位数 */
-	int 				seqBits;
+	int 			 seqBits;
 };
 
 /**
