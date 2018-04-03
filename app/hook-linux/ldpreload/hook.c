@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <dlfcn.h>
-
+#include <errno.h>
 #include <stdlib.h>
 #include <sys/types.h>  
 #include <string.h>
@@ -11,6 +11,8 @@
 #include <netinet/in.h> 
 #include <linux/ip.h>
 #include <linux/tcp.h>
+#include <netdb.h>
+#include <sys/socket.h>
  
 #if defined(RTLD_NEXT)
 #  define REAL_LIBC RTLD_NEXT
@@ -41,7 +43,18 @@ int execv(const char *filename, char *const argv[])
 
     return (*func) (filename, (char **) argv);
 }  
-  
+
+struct hostent* gethostbyname(const char *domain){
+    static int (*func)(const char*);
+    FN(func,int,"gethostbyname", (const char*)); 
+
+    printf("socket gethostbyname(%s) hooked!!\n",domain);
+
+    struct hostent *ht = (*func) (domain);
+
+    return ht;
+}
+
 int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen) 
 { 
     static int (*func)(int, const struct sockaddr *, socklen_t);
@@ -92,3 +105,4 @@ int init_module(void *module_image, unsigned long len, const char *param_values)
 
     return (*func) ((void *)module_image, (unsigned long)len, (const char *)param_values);
 }
+

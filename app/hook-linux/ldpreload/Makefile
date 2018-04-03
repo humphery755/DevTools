@@ -23,8 +23,9 @@ KDIR := /lib/modules/$(shell uname -r)/build
 PWD := $(shell pwd)
  
 all:
-    $(MAKE) -C $(KDIR) M=$(PWD) modules
-    LD_PRELOAD=./hook.so insmod hello.ko
+	$(MAKE) -C $(KDIR) M=$(PWD) modules
+	LD_PRELOAD=./hook.so insmod hello.ko
  
 clean:
-    $(MAKE) -C $(KDIR) M=$(PWD) clean
+	$(MAKE) -C $(KDIR) M=$(PWD) clean
+
