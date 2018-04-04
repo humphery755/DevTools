@@ -94,7 +94,6 @@ inline static void init(){
         pthread_mutex_unlock(&lock);
         return;
     }
-    FN(Real_gethostbyname,struct hostent*,"gethostbyname", (const char*));
 
     char buf[1024];
     get_cmdline_from_pid(getppid(), buf, 1024);
@@ -105,13 +104,14 @@ inline static void init(){
 }
 
 struct hostent* gethostbyname(const char *domain){
+    //fprintf(stdout,"1 socket gethostbyname(%s) hooked!!\n",domain);
     init();
-    //static struct hostent* (*func)(const char*);
-    //FN(func,struct hostent*,"gethostbyname", (const char*));
-    Syelog("socket gethostbyname(%s) hooked!!\n",domain);
+    static struct hostent* (*func)(const char*);
+    FN(func,struct hostent*,"gethostbyname", (const char*));
+    //Syelog("2 socket gethostbyname(%s) hooked!!\n",domain);
 
-    struct hostent *ht = Mine_gethostbyname(domain);
-
+    struct hostent *ht = Mine_gethostbyname(domain,func);
+    //Syelog("3 socket gethostbyname(%s) hooked!!\n",domain);
     return ht;
 }
 
@@ -120,7 +120,7 @@ int getaddrinfo( const char *hostname, const char *service, const struct addrinf
     static int (*func)(const char *, const char *, const struct addrinfo *, struct addrinfo **);
     FN(func,int,"getaddrinfo", (const char *, const char *, const struct addrinfo *, struct addrinfo **)); 
 
-    printf("socket getaddrinfo(%s,%s,%p,%p) hooked!!\n",hostname,service,hints,result);
+    printf("### socket getaddrinfo(%s,%s,%p,%p) hooked!!\n",hostname,service,hints,result);
 
     int res = (*func) (hostname,service,hints,result);
 
@@ -140,7 +140,7 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
     getsockopt(sockfd, SOL_SOCKET, SO_TYPE, &optval, &optlen);
 
     if(optval==SOCK_STREAM){
-        printf("TCP connect hooked!!\n");
+        //printf("TCP connect hooked!!\n");
 
         Mine_connect(addr,addrlen);
     }
@@ -153,7 +153,7 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
     3. 然后再打印
     调试的时候发现直接获取打印会导致core dump
     */
-    printf("socket connect hooked!!\n");
+    //printf("socket connect hooked!!\n");
 
     int ret_code = (*func) (sockfd, addr, addrlen);
     int tmp_errno = errno;
@@ -173,7 +173,7 @@ ssize_t send(int sockfd, const void *buff, size_t nbytes, int flags){
     Mine_send_enter(buff,nbytes);
     static ssize_t (*func)(int, const void*, size_t, int);
     FN(func,ssize_t,"send", (int, const void*, size_t, int)); 
-    printf("socket send(%d,%s,%zd,%d) hooked!!\n",sockfd, (char*)buff, nbytes, flags);
+    //printf("socket send(%d,%s,%zd,%d) hooked!!\n",sockfd, (char*)buff, nbytes, flags);
 
     ssize_t len = (*func) (sockfd, buff, nbytes, flags);
 
