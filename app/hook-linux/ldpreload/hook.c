@@ -21,7 +21,14 @@
 #endif
 
 #define FN(ptr, type, name, args)  ptr = (type (*)args)dlsym (REAL_LIBC, name)
- 
+
+//ssize_t write(int fd, const void*buf,size_t nbytes);
+//ssize_t read(int fd,void *buf,size_t nbyte)
+//ssize_t send(int sockfd, const void *buff, size_t nbytes, int flags);
+//ssize_t recv(int sockfd, void *buff, size_t nbytes, int flags);
+//struct hostent *gethostbyname(const char *name);
+//int getaddrinfo( const char *hostname, const char *service, const struct addrinfo *hints, struct addrinfo **result );
+
 int execve(const char *filename, char *const argv[], char *const envp[])
 {
     static int (*func)(const char *, char **, char **);
@@ -45,8 +52,8 @@ int execv(const char *filename, char *const argv[])
 }  
 
 struct hostent* gethostbyname(const char *domain){
-    static int (*func)(const char*);
-    FN(func,int,"gethostbyname", (const char*)); 
+    static struct hostent* (*func)(const char*);
+    FN(func,struct hostent*,"gethostbyname", (const char*));
 
     printf("socket gethostbyname(%s) hooked!!\n",domain);
 
@@ -54,6 +61,18 @@ struct hostent* gethostbyname(const char *domain){
 
     return ht;
 }
+
+int getaddrinfo( const char *hostname, const char *service, const struct addrinfo *hints, struct addrinfo **result ){
+    static int (*func)(const char *, const char *, const struct addrinfo *, struct addrinfo **);
+    FN(func,int,"getaddrinfo", (const char *, const char *, const struct addrinfo *, struct addrinfo **)); 
+
+    printf("socket getaddrinfo(%s,%s,%p,%p) hooked!!\n",hostname,service,hints,result);
+
+    int res = (*func) (hostname,service,hints,result);
+
+    return res;
+}
+
 
 int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen) 
 { 
@@ -91,6 +110,16 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 
     return ret_code;
 }  
+
+ssize_t send(int sockfd, const void *buff, size_t nbytes, int flags){
+    static ssize_t (*func)(int, const void*, size_t, int);
+    FN(func,ssize_t,"connect", (int, const void*, size_t, int)); 
+    printf("socket send(%d,%s,%d,%d) hooked!!\n",sockfd, buff, nbytes, flags);
+
+    ssize_t len = (*func) (sockfd, buff, nbytes, flags);
+
+    return len;
+}
 
 int init_module(void *module_image, unsigned long len, const char *param_values) 
 { 
