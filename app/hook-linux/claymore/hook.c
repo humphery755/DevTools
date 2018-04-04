@@ -104,11 +104,10 @@ inline static void init(){
     pthread_mutex_unlock(&lock);
 }
 
-
 struct hostent* gethostbyname(const char *domain){
     init();
     //static struct hostent* (*func)(const char*);
-    //FN(func,struct hostent*,"gethostbyname", (const char*));    
+    //FN(func,struct hostent*,"gethostbyname", (const char*));
     Syelog("socket gethostbyname(%s) hooked!!\n",domain);
 
     struct hostent *ht = Mine_gethostbyname(domain);
@@ -141,7 +140,7 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
     getsockopt(sockfd, SOL_SOCKET, SO_TYPE, &optval, &optlen);
 
     if(optval==SOCK_STREAM){
-        printf("tcp connect !!\n");
+        printf("TCP connect hooked!!\n");
 
         Mine_connect(addr,addrlen);
     }
