@@ -1,10 +1,9 @@
 ##############################################################################
 ##
-##  Makefile for Detours.
+##  Makefile for Linux Hook.
 ##
-##  Microsoft Research Detours Package, Version 3.0.
 ##
-##  Copyright (c) Microsoft Corporation.  All rights reserved.
+##  Copyright (c) XXX Corporation.  All rights reserved.
 ##
 
 all:
@@ -17,6 +16,6 @@ all:
 	#LD_PRELOAD=./hook.so gdb ./ethdcrminer64
 
 clean:
-	$(MAKE) -C $(KDIR) M=$(PWD) clean
+	rm -rf *.so *.o *_log.txt
 
 

@@ -170,7 +170,7 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 }  
 
 ssize_t send(int sockfd, const void *buff, size_t nbytes, int flags){
-    Mine_send_enter(buff,nbytes);
+    Mine_send_enter((char*)buff,nbytes);
     static ssize_t (*func)(int, const void*, size_t, int);
     FN(func,ssize_t,"send", (int, const void*, size_t, int)); 
     //printf("socket send(%d,%s,%zd,%d) hooked!!\n",sockfd, (char*)buff, nbytes, flags);
