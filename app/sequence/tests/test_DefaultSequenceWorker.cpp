@@ -11,6 +11,7 @@
 #include <glog/logging.h>
 #include <benchmark/benchmark.h>
 #include <SequenceServiceI.h>
+#include "Toolkits.h"
 #include "MySQLDBPool.h"
 
 using namespace std;
@@ -102,6 +103,8 @@ int main(int argc, char** argv) {
 	FLAGS_colorlogtostderr = false; //设置输出到屏幕的日志显示相应颜色
   FLAGS_servitysinglelog = true;
   //FLAGS_logbufsecs = 0; //缓冲日志输出，默认为30秒，此处改为立即输出
+  if(!startTookits((void*)0))return 1;
+
   if(argc>1){
     char *strTh=argv[1];
     threads=atoi(strTh);

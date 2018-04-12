@@ -59,7 +59,7 @@ struct ZookeeperHelper
     short local_port;
     struct ZkHelperPairList zoo_path_list;
     struct ZkHelperPairList zoo_event_list;
-	pthread_mutex_t lock;                   /* for zoo_path_list && zoo_event_list && mode */
+    pthread_mutex_t lock;// = PTHREAD_MUTEX_INITIALIZER;                   /* for zoo_path_list && zoo_event_list && mode */
     int mode;
     int reconnection_flag;
     char election_node[50];

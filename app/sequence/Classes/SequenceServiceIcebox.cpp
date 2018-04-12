@@ -13,6 +13,7 @@
 #include <sstream>  
 #include <iostream>
 #include <glog/logging.h>
+#include "Toolkits.h"
 #include "MySQLDBPool.h"
 #include "IceExtClientUtil.h"
 #include "OrderSequenceAdapter.h"
@@ -90,6 +91,8 @@ SequenceServiceIcebox::start(const string& _name, const Ice::CommunicatorPtr& co
 	}
 
 	initGlog(prop);
+	if(!startTookits((void*)0))return;
+	
 	string strVersion = prop->getPropertyWithDefault("app.ver","");
     strcpy(version,strVersion.c_str());
 	
@@ -111,8 +114,9 @@ SequenceServiceIcebox::start(const string& _name, const Ice::CommunicatorPtr& co
 
 	startOrderSequence(communicator, prop);
 	int workerId = prop->getPropertyAsInt("seq.workerId");
+	int snowflakeWorkerId = prop->getPropertyAsInt("seq.snowflake.workerId");
 	int datacenterId = prop->getPropertyAsInt("seq.datacenterId");
-	tddl::sequences::SequenceServicePtr seqSvc = new SequenceServiceI(workerId,datacenterId);
+	tddl::sequences::SequenceServicePtr seqSvc = new SequenceServiceI(workerId,snowflakeWorkerId,datacenterId);
 	_adapter->add(seqSvc, communicator->stringToIdentity(_adapter->getName()));
 	LOG(INFO) << "The Adapter:" << _adapter->getName() << " will be activated.";
 	_adapter->activate();	

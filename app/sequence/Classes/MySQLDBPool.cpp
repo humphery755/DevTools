@@ -15,18 +15,13 @@
 #include <string.h>
 #include <sys/time.h>
 #include <glog/logging.h>
+#include "Toolkits.h"
 #include "MySQLDBPool.h"
 using namespace std;
 
 multidb::MySQLDBPool multidb::MySQLDBPool::m_Pool;
 pthread_mutex_t pool_lock = PTHREAD_MUTEX_INITIALIZER;
 static int CHECK_INTERVAL=60; //检测时间间隔 120 second
-
-void multidb::MySQLDBPool::updateTime(){
-	struct timeval tv;      
-	gettimeofday(&tv,NULL);    //该函数在sys/time.h头文件中  
-	currentTime = tv.tv_sec;
-}
 
 void* multidb::MySQLDBPool::PoolCheckThFunc(void * pParam)
 {
@@ -35,25 +30,21 @@ void* multidb::MySQLDBPool::PoolCheckThFunc(void * pParam)
 	int interval;//50 second
 
 	multidb::MySQLDBPool* self = (multidb::MySQLDBPool *)pParam;
-	self->updateTime();
 	//连接池维护线程
 	while(self->runing)
 	{
-		curTime=self->getCurrentTime();
+		curTime=getCurrentTime();
 		iter = self->poolMap.begin();
 		while(iter != self->poolMap.end())
 		{
 			iter->second->CheckConnection();
 			iter++;	
-			self->updateTime();
 		}
-		interval = CHECK_INTERVAL-(self->getCurrentTime()-curTime);
+		interval = CHECK_INTERVAL-(getCurrentTime()-curTime);
 		for(int i=0;i<interval;i++){
 			sleep(1);
-			self->updateTime();
 		}
 	}
-	self->updateTime();
 	return NULL;
 }
 
@@ -111,8 +102,7 @@ bool multidb::MySQLDBPool::RegistDataBase(int dbid,const char* connectstr,int mi
 }
 
 bool multidb::MySQLDBPool::Startup(){
-	std::map<int,multidb::MySQLSingleDBPool*>::iterator iter;	
-	updateTime();
+	std::map<int,multidb::MySQLSingleDBPool*>::iterator iter;
 	try
     {
 		Lock l(&pool_lock);
@@ -353,7 +343,7 @@ multidb::Connection* multidb::MySQLSingleDBPool::GetConnection()
 {
 	Connection *pconn;
 	if(!runing) return NULL; 
-	int64_t time = multidb::MySQLDBPool::GetMySQLPool()->getCurrentTime();
+	int64_t time = getCurrentTime();
 	Lock l(&lock);
 	if(!freeQueue.empty() ){
 		pconn = freeQueue.front();
@@ -391,7 +381,7 @@ void multidb::MySQLSingleDBPool::ReleaseConnect(Connection *pConn,bool bConngood
 	}
 
 	if(runing && (bConngood || !pConn->isErr)){
-		pConn->lastTime = multidb::MySQLDBPool::GetMySQLPool()->getCurrentTime();
+		pConn->lastTime = getCurrentTime();
 		Lock l(&lock);
 		freeQueue.push(pConn);
 		__sync_add_and_fetch(&usedConns,-1);
@@ -408,7 +398,7 @@ void multidb::MySQLSingleDBPool::ReleaseConnect(Connection *pConn,bool bConngood
 int multidb::MySQLSingleDBPool::CheckConnection()
 {
 	Connection *pconn;
-	int64_t curTime = multidb::MySQLDBPool::GetMySQLPool()->getCurrentTime();
+	int64_t curTime = getCurrentTime();
 
 	std::queue<Connection*> tmpQueue;
 	{
@@ -437,7 +427,7 @@ int multidb::MySQLSingleDBPool::CheckConnection()
 		LOG(INFO) << "connection "<< pconn <<" idle["<<curTime - pconn->lastTime<<"] be closed";
 		pconn->close();
 		delete pconn;
-		pconn = NULL;		
+		pconn = NULL;
 	}
 	return 0;
 }

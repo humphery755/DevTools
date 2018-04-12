@@ -5,6 +5,7 @@
 #include <Glacier2/Application.h>
 #include <IceUtil/Exception.h>
 //#include <glog/logging.h>
+#include "Toolkits.h"
 #include "IceExtClientUtil.h"
 
 using namespace std;
@@ -61,7 +62,6 @@ public:
     }
 private:
 	Ice::CommunicatorPtr     _communicator;
-    //Ice::InitializationData  initData;
     std::string              user;
     std::string              passwd;
     volatile bool            runing;
@@ -125,9 +125,8 @@ public:
                         _initialized = true;
                         notifyAll();
                     }else{
-                        struct timeval tv;
-                        gettimeofday(&tv,NULL);
-                        if(tv.tv_sec - last_time > 60){
+                        int64_t currentTime = getCurrentTime();
+                        if(currentTime - last_time > 60){
                             Lock sync(*this);
                             session->ice_ping(context);
                             //getProcessLogger()->print("ice_ping success.");
@@ -249,9 +248,7 @@ Glacier2::SessionPrx Glacier2Communicator::createSession()
 
 Ice::ObjectPrx Glacier2Communicator::stringToProxy(string& id)
 {
-    struct timeval tv;
-    gettimeofday(&tv,NULL);
-    last_time = tv.tv_sec;
+    last_time = getCurrentTime();
     Lock sync(*this);
     if(_initialized){
         return _communicator->stringToProxy(svcId.empty()?id:svcId);

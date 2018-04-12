@@ -1,17 +1,23 @@
 
 #include <stdio.h>
 #include <string>
-#include<stdlib.h>
+#include <stdlib.h>
 #include <sstream>  
 #include <iostream>
 #include <stdint.h>
+#include <sys/time.h>
+#include <unistd.h>
 #include "Toolkits.h"
 
-static bool runing;
-static volatile int64_t currentTime=0;
+static bool                     runing=false;
+static volatile int64_t         currentTime=0;	/** 时间缓存 **/
 
 int64_t getCurrentTime(){return currentTime;}
 
+/****************************************************************************************	
+*@description		为避免每次都调用OS的gettimeofday，采用自行维护时间缓存(针对对于服务器的时间管理不需要精确需求)
+*@frequency of call	单线程定时调用
+******************************************************************************************/
 static void* updateTime(void * pParam){
     while(runing)
 	{
@@ -20,6 +26,7 @@ static void* updateTime(void * pParam){
         currentTime = tv.tv_sec;
         sleep(1);
     }
+    return (void*)0;
 }
 
 bool startTookits(void * pParam){
@@ -29,7 +36,7 @@ bool startTookits(void * pParam){
 	pthread_t localThreadId;
 	if ( pthread_create( &localThreadId, NULL, updateTime, pParam ) != 0 )
 	{
-		cout  << "pthread_create failed" <<endl;
+		std::cout  << "pthread_create failed" <<std::endl;
 		return false;
 	}
 	pthread_detach(localThreadId);
@@ -39,3 +46,4 @@ bool startTookits(void * pParam){
 void stopTookits(){
     runing = false;
 }
+

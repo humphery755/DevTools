@@ -12,7 +12,7 @@ using namespace std;
 #include <uuid/uuid.h>
 #include <glog/logging.h>
 #include <benchmark/benchmark.h>
-
+#include "Toolkits.h"
 #include "MySQLDBPool.h"
 
 using namespace std;
@@ -291,6 +291,8 @@ int main(int argc, char** argv) {
   FLAGS_servitysinglelog = true;
   FLAGS_logbufsecs = 0; //缓冲日志输出，默认为30秒，此处改为立即输出
   FLAGS_max_log_size = 100; //最大日志大小为 100MB
+
+  if(!startTookits((void*)0))return 1;
 
   string strurl = "Driver=MYSQL UTF8;Server=192.168.1.12;Database=serorder;UID=admin;PWD=admin";
   for(int i=0;i<10;i++)

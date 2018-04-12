@@ -30,11 +30,13 @@ INCLUDES=-Iobjs -Igenerated -IClasses -I$(ICE_HOME)/include -I$(MYSQL_HOME)/incl
 
 GEN_OBJS	= $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(GEN_SRC))
 #STATICLIBS += -L$(LOG4C_HOME)/lib/liblog4c.a
-TEST_DBPool_OBJS	= $(patsubst %.cpp, $(OBJ_DIR)/%.o, Classes/MySQLDBPool.cpp tests/test_MySQLDBPool.cpp)
+TEST_DBPool_OBJS	= $(patsubst %.cpp, $(OBJ_DIR)/%.o, Classes/MySQLDBPool.cpp Classes/Toolkits.cpp tests/test_MySQLDBPool.cpp)
 TEST_Server_OBJS	= $(patsubst %.cpp, $(OBJ_DIR)/%.o, tests/Server.cpp)
 TEST_Client_OBJS	= $(patsubst %.cpp, $(OBJ_DIR)/%.o, Classes/IceExtClientUtil.cpp tests/Client.cpp)
 TEST_SnowflakeIdWorker_OBJS	= $(patsubst %.cpp, $(OBJ_DIR)/%.o, Classes/SnowflakeIdWorker.cpp tests/test_SnowflakeIdWorker.cpp)
-TEST_DefaultSequenceWorker_OBJS	= $(patsubst %.cpp, $(OBJ_DIR)/%.o, Classes/DefaultSequenceWorker.cpp tests/test_DefaultSequenceWorker.cpp Classes/MySQLDBPool.cpp)
+TEST_DefaultSequenceWorker_OBJS	= $(patsubst %.cpp, $(OBJ_DIR)/%.o, Classes/Toolkits.cpp Classes/DefaultSequenceWorker.cpp tests/test_DefaultSequenceWorker.cpp Classes/MySQLDBPool.cpp)
+TEST_OrderSequenceAdapter_OBJS	= $(patsubst %.cpp, $(OBJ_DIR)/%.o, Classes/Toolkits.cpp Classes/MySQLDBPool.cpp Classes/OrderSequenceAdapter.cpp \
+	Classes/zookeeper_helper.cpp Classes/SequenceServiceI.cpp Classes/DefaultSequenceWorker.cpp Classes/SnowflakeIdWorker.cpp tests/test_OrderSequenceAdapter.cpp)
 
 ####### Build rules
 $(TARGET): $(OBJECTS) $(CORE_MAKEFILE_LIST)
@@ -51,7 +53,7 @@ client: $(GEN_OBJS) $(TEST_Client_OBJS)
 	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib64:$(BENCHMARK_HOME)/lib:$(MYSQL_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH) gdb ./test
 
 
-snow: $(GEN_OBJS) $(TEST_SnowflakeIdWorker_OBJS)
+testsf: $(GEN_OBJS) $(TEST_SnowflakeIdWorker_OBJS)
 	g++  $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(GEN_OBJS) -L$(ICE_HOME)/lib64 $(SHAREDLIBS) -lGlacier2 -ldb_cxx-5.3 \
 	$(TEST_SnowflakeIdWorker_OBJS) -I $(BENCHMARK_HOME)/include -L $(BENCHMARK_HOME)/lib  -lpthread -lbenchmark -o test
 	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib64:$(BENCHMARK_HOME)/lib:$(MYSQL_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH) ./test 2 --benchmark_counters_tabular=true
@@ -72,6 +74,11 @@ dbpool: $(TEST_DBPool_OBJS)
 	g++ $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(TEST_DBPool_OBJS) \
 	-L $(BENCHMARK_HOME)/lib -L$(GLOG_HOME)/lib -L$(MYSQL_HOME)/lib -lmysqlcppconn -lglog -lpthread -lbenchmark -o test
 	LD_LIBRARY_PATH=.:$(BENCHMARK_HOME)/lib:$(MYSQL_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH) ./test 1 --benchmark_counters_tabular=true
+
+testos: $(GEN_OBJS) $(TEST_OrderSequenceAdapter_OBJS)
+	g++  $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(GEN_OBJS) -L$(ICE_HOME)/lib64 $(SHAREDLIBS) -lGlacier2 -ldb_cxx-5.3 \
+	$(TEST_OrderSequenceAdapter_OBJS) -I $(BENCHMARK_HOME)/include -L $(BENCHMARK_HOME)/lib  -lpthread -lbenchmark -o test
+	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib64:$(BENCHMARK_HOME)/lib:$(MYSQL_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH) ./test 2 --benchmark_counters_tabular=true
 
 tools:
 	g++ -g tests/SeqTools.cpp -o tools

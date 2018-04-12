@@ -6,6 +6,7 @@
 
 #include <Ice/Ice.h>
 #include <glog/logging.h>
+#include "Toolkits.h"
 #include "MySQLDBPool.h"
 #include <SequenceServiceI.h>
 
@@ -82,6 +83,7 @@ Server::run(int argc, char*[])
 		return -1;
 	}
     initGlog(prop);
+	if(!startTookits((void*)0))return 1;
 
 	string strUrl = prop->getPropertyWithDefault("seq.database.driver.url","root/1@127.0.0.1:3306/test");
 	int minPoolSize = prop->getPropertyAsInt("seq.database.driver.minPoolSize");
@@ -92,11 +94,12 @@ Server::run(int argc, char*[])
   	if(!multidb::MySQLDBPool::GetMySQLPool()->Startup())return 1;
 
 	int workerId = prop->getPropertyAsInt("seq.workerId");
+	int snowflakeWorkerId = prop->getPropertyAsInt("seq.snowflake.workerId");
 	int datacenterId = prop->getPropertyAsInt("seq.datacenterId");
 
     Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("tddl.sequences.SequenceService");
-	tddl::sequences::SequenceServicePtr seqService = new SequenceServiceI(workerId,datacenterId);
-	tddl::sequences::SequenceServicePtr orderSequence = new SequenceServiceI(workerId,datacenterId);
+	tddl::sequences::SequenceServicePtr seqService = new SequenceServiceI(workerId,snowflakeWorkerId,datacenterId);
+	tddl::sequences::SequenceServicePtr orderSequence = new SequenceServiceI(workerId,snowflakeWorkerId,datacenterId);
     //Demo::PricingEnginePtr pricing = new PricingI(properties->getPropertyAsList("Currencies"));
     adapter->add(seqService, communicator()->stringToIdentity("tddl.sequences.SequenceService"));
 	adapter->add(orderSequence, communicator()->stringToIdentity("tddl.sequences.OrderSequenceService"));

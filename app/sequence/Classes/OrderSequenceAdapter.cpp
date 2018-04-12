@@ -117,7 +117,7 @@ static void test_event(struct ZkEvent *zk_event, struct ZookeeperHelper *zk_help
 }
 
 static ::Ice::ObjectAdapterPtr adapter;
-static Ice::CommunicatorPtr communicator;
+static std::string adapterName;
 static Ice::PropertiesPtr prop;
 
 static void * start_leader_election(void *arg)
@@ -169,23 +169,23 @@ static void register_to_registry(){
         return;
     }
     LOG(INFO) <<"This is ["<<zk_helper->election_node<<"], i am a leader\n"; 
-    adapter->activate();
-    LOG(INFO) << "The Adapter:" << adapter->getName() << " be activated.";    
+    if(adapter)adapter->activate();
+    LOG(INFO) << "The Adapter:" << adapterName << " be activated.";    
     isregister=true;
     pthread_mutex_unlock(&lock);
 }
 static void unregister_4_registry(){
     pthread_mutex_lock(&lock);
     if(isregister){
-        LOG(INFO) << "The Adapter: " << adapter->getName() << " be restart." ;
-        adapter->deactivate();
+        LOG(INFO) << "The Adapter: " << adapterName << " be restart." ;
+        if(adapter)adapter->deactivate();
         isregister=false;
         exit(0);
     }
     pthread_mutex_unlock(&lock);
 }
 
-void startOrderSequence(const Ice::CommunicatorPtr& _communicator, Ice::PropertiesPtr& _prop){
+void startOrderSequence(const Ice::CommunicatorPtr& communicator, Ice::PropertiesPtr& _prop){
     string strHosts = _prop->getPropertyWithDefault("seq.zookeeper.hosts","");
     if(strHosts.length()<5){
         LOG(ERROR) << ADAPTER_NAME <<" has not been registered: " << "seq.zookeeper.hosts is null";
@@ -199,17 +199,18 @@ void startOrderSequence(const Ice::CommunicatorPtr& _communicator, Ice::Properti
         exit(1);
     }
 
-    communicator=_communicator;
     prop=_prop;   
 
     ostringstream name_stream;
     name_stream << ADAPTER_NAME << version;
+    adapterName = name_stream.str();
     LOG(INFO) << "start createAdapter: " << name_stream.str();
-    adapter = communicator->createObjectAdapter(name_stream.str());  
+    if(communicator)adapter = communicator->createObjectAdapter(adapterName);
     int workerId = prop->getPropertyAsInt("seq.workerId");
+    int snowflakeWorkerId = prop->getPropertyAsInt("seq.snowflake.workerId");
 	int datacenterId = prop->getPropertyAsInt("seq.datacenterId");
-    tddl::sequences::SequenceServicePtr orderSeqSvc = new SequenceServiceI(workerId,datacenterId);    
-    adapter->add(orderSeqSvc, communicator->stringToIdentity(adapter->getName()));
+    tddl::sequences::SequenceServicePtr orderSeqSvc = new SequenceServiceI(workerId,snowflakeWorkerId,datacenterId);
+    if(adapter)adapter->add(orderSeqSvc, communicator->stringToIdentity(adapterName));
 
     int err = pthread_create(&test_id, NULL, start_leader_election, NULL); 
     if ( 0 != err ) 
@@ -218,8 +219,8 @@ void startOrderSequence(const Ice::CommunicatorPtr& _communicator, Ice::Properti
     }
 }
 void stopOrderSequence(){
-    LOG(INFO) << "The Adapter: " << adapter->getName() << " be destroy." ;
-    adapter->destroy();
+    LOG(INFO) << "The Adapter: " << adapterName << " be destroy." ;
+    if(adapter)adapter->destroy();
     destory_zookeeper_helper(zk_helper);
     zk_helper = NULL;
     pthread_kill(test_id,SIGINT);

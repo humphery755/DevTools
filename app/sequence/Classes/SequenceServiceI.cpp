@@ -22,8 +22,8 @@ using namespace std;
 using namespace tddl::sequences;
 
 #define INCREMENT 0
-#define INCREMENT64 2
 #define INCREMENT32 1
+#define INCREMENT64 2
 #define SNOW_FLAKE 3
 
 static int retryTimes=3;
@@ -63,10 +63,11 @@ static int getAlgorithmCfg(string name){
 }
 
 
-SequenceServiceI::SequenceServiceI(unsigned int workerId, int datacenterId)
+SequenceServiceI::SequenceServiceI(unsigned int workerId, unsigned int snowflakeWorkerId, int datacenterId)
 {
 	pthread_rwlock_init(&rangeLock,NULL);
 	this->workerId = workerId;
+	this->snowflakeWorkerId = snowflakeWorkerId;
 	this->datacenterId=datacenterId;
 }
 
@@ -117,8 +118,8 @@ SequenceRange SequenceServiceI::nextValue(const ::std::string& name, ::Ice::Int 
 					currentRange = new DefaultSequenceWorker(name,workerId,datacenterId,32);
 					break;
 				case SNOW_FLAKE:
-					//workerId,datacenterId合二为一
-					currentRange = new SnowflakeIdWorker(name,workerId,-1);
+					//snowflakeWorkerId,datacenterId合二为一
+					currentRange = new SnowflakeIdWorker(name,snowflakeWorkerId,-1);
 					break;
 				default:
 					LOG(ERROR) << "Unknown Sequence Algorithm config:"<<algorithm;
