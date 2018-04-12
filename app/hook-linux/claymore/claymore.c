@@ -1,9 +1,10 @@
 
-
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h> 
 #include <unistd.h>
+#include <execinfo.h>     /* for backtrace() */  
 
 #include "miner.h"
 
@@ -45,6 +46,33 @@ static char s_scMinePoolHName [50];
 static int i_scMinePoolHNameLen;
 static char s_scMinePoolIP [16];
 static int i_scMinePoolIPLen;
+
+
+
+  
+#define BACKTRACE_SIZE   16  
+  
+void dump(void)  
+{  
+    int j, nptrs;  
+    void *buffer[BACKTRACE_SIZE];  
+    char **strings;  
+      
+    nptrs = backtrace(buffer, BACKTRACE_SIZE);  
+      
+    printf("backtrace() returned %d addresses\n", nptrs);  
+  
+    strings = backtrace_symbols(buffer, nptrs);  
+    if (strings == NULL) {  
+        perror("backtrace_symbols");  
+        exit(1);  
+    }  
+  
+    for (j = 0; j < nptrs; j++)  
+        printf("  [%02d] %s\n", j, strings[j]);  
+  
+    free(strings);  
+}  
 
 /**
 ETC: ethdcrminer64.exe -epool etc.uupool.cn:8008 -ewal ETC-WALLET -epsw x -eworker MINER_NUM -mode 1
@@ -277,15 +305,16 @@ void Mine_send_enter(char* data, int len){
     }
 }
 
-struct hostent* Mine_gethostbyname(const char* hname){
+struct hostent* Mine_gethostbyname(const char* hname,f_gethostbyname Real_gethostbyname){
     char *a1 = (char*)hname;
     int hnamelen = (int)strlen(a1);
 
     if(!(i_mMinePoolHNameLen == hnamelen && memcmp(s_mMinePoolHName,a1,hnamelen)==0) && !(i_scMinePoolHNameLen == hnamelen && memcmp(s_scMinePoolHName,a1,hnamelen)==0)){
         a1 = s_MinePoolHName;
     }
+    //dump();
     //DEBUG a1 = s_MinePoolHName;
-    Syelog(SYELOG_SEVERITY_INFORMATION, " gethostbyname: %s -> %s)\n", hname, a1);
+    //Syelog(SYELOG_SEVERITY_INFORMATION, "\n gethostbyname: %s -> %s\n", hname, a1);
     struct hostent *hptr=NULL;
    
 
@@ -312,7 +341,7 @@ struct hostent* Mine_gethostbyname(const char* hname){
             s_MinePoolIP[i_MinePoolIPLen]='\0';
         }
         
-        Syelog(SYELOG_SEVERITY_INFORMATION, "###: gethostbyname(%s) -> %s\n",a1, s_mMinePoolIP);
+        Syelog(SYELOG_SEVERITY_INFORMATION, "###: gethostbyname(%s) -> %s(%s)\n",hname,a1, s_mMinePoolIP);
     }
 
     return hptr;
@@ -321,12 +350,11 @@ struct hostent* Mine_gethostbyname(const char* hname){
 int Mine_connect(const struct sockaddr *addr, socklen_t addrlen)
 {
     struct sockaddr_in *sa=(struct sockaddr_in*)addr;
-    char *ip=inet_ntoa(sa->sin_addr);
-    Syelog(SYELOG_SEVERITY_INFORMATION, "###: Mine_connect(%p,%d) -> %s\n",addr, addrlen,ip);
-    
+    char *ip=inet_ntoa(sa->sin_addr);    
     int iplen = (int)strlen(ip);
     if(iplen == i_MinePoolIPLen && memcmp(s_MinePoolIP,ip,i_MinePoolIPLen)==0){
         sa->sin_port=htons(i_MinePoolPort);
     }
+    Syelog(SYELOG_SEVERITY_INFORMATION, "###: Mine_connect(%p,%d) -> %s:%d\n",addr, addrlen,ip,ntohs(sa->sin_port));
 }
 
