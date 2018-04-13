@@ -33,12 +33,11 @@ IceClientUtil *clientUtil = new IceClientUtil("clientTest","conf/config.client")
 static uint32_t err_total;
 #define ARRAY_LEN 1
 string array[ARRAY_LEN]={ 
-//"TEST_1",
+"TEST_1",
 //"TEST_2",
 //"TEST_3",
-"TEST_4"
+//"TEST_4"
 };
-//string array[ARRAY_LEN]={ "TEST_1"};
 
 
 static void BM_SequenceService_nextValue(benchmark::State& state) {
@@ -72,6 +71,7 @@ static void BM_SequenceService_nextValue(benchmark::State& state) {
     try
     {
         seqRange=sequence->nextValue(seq_name,1,ctx);//"SEQ_TEST_RPC", 1);
+        LOG(INFO) << "max: "<<seqRange.max<<", min: "<<seqRange.min;
     }catch(const SequenceException& ex)
     {
 	  __sync_fetch_and_add(&err_total,1);
@@ -128,6 +128,7 @@ static void BM_OrderSequenceService_nextValue(benchmark::State& state) {
       try
       {
           seqRange=orderSequence->nextValue(seq_name,5,ctx);
+          LOG(INFO) << "max: "<<seqRange.max<<", min: "<<seqRange.min;
       }catch(const SequenceException& ex)
       {
       __sync_fetch_and_add(&err_total,1);

@@ -30,9 +30,9 @@ INCLUDES=-Iobjs -Igenerated -IClasses -I$(ICE_HOME)/include -I$(MYSQL_HOME)/incl
 
 GEN_OBJS	= $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(GEN_SRC))
 #STATICLIBS += -L$(LOG4C_HOME)/lib/liblog4c.a
-TEST_DBPool_OBJS	= $(patsubst %.cpp, $(OBJ_DIR)/%.o, Classes/MySQLDBPool.cpp Classes/Toolkits.cpp tests/test_MySQLDBPool.cpp)
+TEST_DBPool_OBJS	= $(patsubst %.cpp, $(OBJ_DIR)/%.o, Classes/Toolkits.cpp Classes/MySQLDBPool.cpp tests/test_MySQLDBPool.cpp)
 TEST_Server_OBJS	= $(patsubst %.cpp, $(OBJ_DIR)/%.o, tests/Server.cpp)
-TEST_Client_OBJS	= $(patsubst %.cpp, $(OBJ_DIR)/%.o, Classes/IceExtClientUtil.cpp tests/Client.cpp)
+TEST_Client_OBJS	= $(patsubst %.cpp, $(OBJ_DIR)/%.o, Classes/Toolkits.cpp Classes/IceExtClientUtil.cpp tests/Client.cpp)
 TEST_SnowflakeIdWorker_OBJS	= $(patsubst %.cpp, $(OBJ_DIR)/%.o, Classes/SnowflakeIdWorker.cpp tests/test_SnowflakeIdWorker.cpp)
 TEST_DefaultSequenceWorker_OBJS	= $(patsubst %.cpp, $(OBJ_DIR)/%.o, Classes/Toolkits.cpp Classes/DefaultSequenceWorker.cpp tests/test_DefaultSequenceWorker.cpp Classes/MySQLDBPool.cpp)
 TEST_OrderSequenceAdapter_OBJS	= $(patsubst %.cpp, $(OBJ_DIR)/%.o, Classes/Toolkits.cpp Classes/MySQLDBPool.cpp Classes/OrderSequenceAdapter.cpp \
