@@ -114,9 +114,8 @@ SequenceServiceIcebox::start(const string& _name, const Ice::CommunicatorPtr& co
 
 	startOrderSequence(communicator, prop);
 	int workerId = prop->getPropertyAsInt("seq.workerId");
-	int snowflakeWorkerId = prop->getPropertyAsInt("seq.snowflake.workerId");
 	int datacenterId = prop->getPropertyAsInt("seq.datacenterId");
-	tddl::sequences::SequenceServicePtr seqSvc = new SequenceServiceI(workerId,snowflakeWorkerId,datacenterId);
+	tddl::sequences::SequenceServicePtr seqSvc = new SequenceServiceI(workerId,datacenterId);
 	_adapter->add(seqSvc, communicator->stringToIdentity(_adapter->getName()));
 	LOG(INFO) << "The Adapter:" << _adapter->getName() << " will be activated.";
 	_adapter->activate();	

@@ -63,11 +63,10 @@ static int getAlgorithmCfg(string name){
 }
 
 
-SequenceServiceI::SequenceServiceI(unsigned int workerId, unsigned int snowflakeWorkerId, int datacenterId)
+SequenceServiceI::SequenceServiceI(unsigned int workerId, int datacenterId)
 {
 	pthread_rwlock_init(&rangeLock,NULL);
 	this->workerId = workerId;
-	this->snowflakeWorkerId = snowflakeWorkerId;
 	this->datacenterId=datacenterId;
 }
 
@@ -109,17 +108,17 @@ SequenceRange SequenceServiceI::nextValue(const ::std::string& name, ::Ice::Int 
 			}
 			switch(algorithm){
 				case INCREMENT:
-					currentRange = new DefaultSequenceWorker(name,workerId,datacenterId,0);
+					currentRange = new DefaultSequenceWorker(name,0,datacenterId,0);
 					break;
 				case INCREMENT64:
-					currentRange = new DefaultSequenceWorker(name,workerId,datacenterId,64);
+					currentRange = new DefaultSequenceWorker(name,0,datacenterId,64);
 					break;
 				case INCREMENT32:
-					currentRange = new DefaultSequenceWorker(name,workerId,datacenterId,32);
+					currentRange = new DefaultSequenceWorker(name,0,datacenterId,32);
 					break;
 				case SNOW_FLAKE:
-					//snowflakeWorkerId,datacenterId合二为一
-					currentRange = new SnowflakeIdWorker(name,snowflakeWorkerId,-1);
+					//workerId,datacenterId合二为一
+					currentRange = new SnowflakeIdWorker(name,workerId,-1);
 					break;
 				default:
 					LOG(ERROR) << "Unknown Sequence Algorithm config:"<<algorithm;

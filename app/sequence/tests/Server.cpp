@@ -94,12 +94,11 @@ Server::run(int argc, char*[])
   	if(!multidb::MySQLDBPool::GetMySQLPool()->Startup())return 1;
 
 	int workerId = prop->getPropertyAsInt("seq.workerId");
-	int snowflakeWorkerId = prop->getPropertyAsInt("seq.snowflake.workerId");
 	int datacenterId = prop->getPropertyAsInt("seq.datacenterId");
 
     Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("tddl.sequences.SequenceService");
-	tddl::sequences::SequenceServicePtr seqService = new SequenceServiceI(workerId,snowflakeWorkerId,datacenterId);
-	tddl::sequences::SequenceServicePtr orderSequence = new SequenceServiceI(workerId,snowflakeWorkerId,datacenterId);
+	tddl::sequences::SequenceServicePtr seqService = new SequenceServiceI(workerId,datacenterId);
+	tddl::sequences::SequenceServicePtr orderSequence = new SequenceServiceI(workerId,datacenterId);
     //Demo::PricingEnginePtr pricing = new PricingI(properties->getPropertyAsList("Currencies"));
     adapter->add(seqService, communicator()->stringToIdentity("tddl.sequences.SequenceService"));
 	adapter->add(orderSequence, communicator()->stringToIdentity("tddl.sequences.OrderSequenceService"));

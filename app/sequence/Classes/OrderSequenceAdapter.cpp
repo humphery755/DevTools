@@ -207,9 +207,8 @@ void startOrderSequence(const Ice::CommunicatorPtr& communicator, Ice::Propertie
     LOG(INFO) << "start createAdapter: " << name_stream.str();
     if(communicator)adapter = communicator->createObjectAdapter(adapterName);
     int workerId = prop->getPropertyAsInt("seq.workerId");
-    int snowflakeWorkerId = prop->getPropertyAsInt("seq.snowflake.workerId");
 	int datacenterId = prop->getPropertyAsInt("seq.datacenterId");
-    tddl::sequences::SequenceServicePtr orderSeqSvc = new SequenceServiceI(workerId,snowflakeWorkerId,datacenterId);
+    tddl::sequences::SequenceServicePtr orderSeqSvc = new SequenceServiceI(workerId,datacenterId);
     if(adapter)adapter->add(orderSeqSvc, communicator->stringToIdentity(adapterName));
 
     int err = pthread_create(&test_id, NULL, start_leader_election, NULL); 

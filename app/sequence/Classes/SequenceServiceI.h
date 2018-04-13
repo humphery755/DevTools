@@ -148,7 +148,7 @@ private:
 class SequenceServiceI : public tddl::sequences::SequenceService
 {
 public:
-	SequenceServiceI(unsigned int workerId, unsigned int snowflakeWorkerId, int datacenterId);
+	SequenceServiceI(unsigned int workerId, int datacenterId);
 	virtual ~SequenceServiceI();
 	virtual tddl::sequences::SequenceRange nextValue(const ::std::string&, ::Ice::Int, const ::Ice::Current&);
 
@@ -157,7 +157,6 @@ private:
 	pthread_rwlock_t rangeLock;
 	/** 工作机器ID(0~31) */
     unsigned int workerId;
-	unsigned int snowflakeWorkerId;
     /** 数据中心ID(0~31) */
     int datacenterId;
 };
