@@ -13,7 +13,21 @@ const url = require('url')
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let mainWindow
+let mainWindow=null
+
+const shouldQuit = app.makeSingleInstance(
+      (commandLine, workingDirectory) => {
+          if (mainWindow) {
+              if (mainWindow.isMinimized()){
+                   mainWindow.restore();
+              };
+          mainWindow.focus();
+       };
+ });
+ if (shouldQuit) {
+    app.quit();
+    return;
+ };
 
 function createWindow () {
   // Create the browser window.
