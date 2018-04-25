@@ -16,7 +16,7 @@ node-gyp rebuild -target="1.8.4" -arch=x64 -dist-url="https://atom.io/download/a
 cd node_modules/ref
 node-gyp rebuild -target="1.8.4" -arch=x64 -dist-url="https://atom.io/download/atom-shell"
 
-# set vcvars64.bat
+# cd native && set vcvars64.bat
 vi compile.bat
 # make dll
 # run compile.bat
@@ -36,7 +36,8 @@ cnpm install -g electron-builder
 cnpm install electron-updater --save
 
 
-cnpm run pack
+yarn packg
+yarn dist
 
 如何进行更新？
 

@@ -25,8 +25,9 @@
     "appId": "com.electron.awen.hello",
     "copyright": "awen",
     "productName": "test",
-    "files": ["main.js","native/*.dll","main","renderer"],
-    "asar": false,
+    "files": ["main.js","main","renderer"],
+    "extraFiles": ["native/*.dll"],
+    "asar": true,
     "publish": [
       {
         "provider": "generic",

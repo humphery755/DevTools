@@ -18,7 +18,7 @@ exports.User32 = ffi.Library('user32', {
 'GetSystemMenu': ['int', ['int', 'bool']],
 'DestroyWindow': ['bool', ['int']]
 });
-var testdll = path.join(__dirname, '../native/libtestdll.dll');
+var testdll = "native/libtestdll.dll";//path.join(__dirname, '../native/libtestdll.dll');
 console.log(testdll);
 exports.TestDLL = ffi.Library(testdll, {
 'XAdd' : ['int',['int','int']]
