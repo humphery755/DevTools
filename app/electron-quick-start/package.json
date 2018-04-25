@@ -4,7 +4,12 @@
   "description": "A minimal Electron application",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "postinstall": "electron-builder install-app-deps",
+    "start": "electron .",
+    "compile": "rimraf ./dist",
+    "packg": "yarn compile && electron-builder --dir",
+    "compile1": "asar pack src ./dist/win-ia32-unpacked/resources/app.asar",    
+    "dist": "yarn compile && electron-builder --win --x64"
   },
   "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
@@ -16,12 +21,54 @@
   ],
   "author": "GitHub",
   "license": "CC0-1.0",
+  "build": {
+    "appId": "com.electron.awen.hello",
+    "copyright": "awen",
+    "productName": "test",
+    "files": ["main.js","native/*.dll","main","renderer"],
+    "asar": false,
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "http://www.autoUpdaterUrl.com/"
+      }
+    ],
+    "dmg": {
+      "background": "build/background.png",
+      "icon": "build/icon.icns",
+      "window": {
+        "x": 100,
+        "y": 100,
+        "width": 500,
+        "height": 300
+      }
+    },
+    "squirrelWindows": {
+      "iconUrl": "https://github.com/favicon.ico"
+    }
+  },
+  "electronWebpack": {
+    "commonSourceDirectory": "common",
+    "main": {
+      "sourceDirectory": "src",
+      "webpackConfig": "webpack.config.js"
+    },
+    "renderer": {
+      "sourceDirectory": null
+    }
+  },
   "devDependencies": {
+    "asar": "^0.12.0",
     "devtron": "^1.4.0",
     "electron": "1.8.4",
-    "electron-rebuild": "^1.7.3"
+    "electron-builder": "^20.10.0",
+    "electron-webpack": "^2.0.1",
+    "webpack": "^4.4.1",
+    "rimraf": "^2.6.2"
   },
   "dependencies": {
-    "ffi": "^2.2.0"
+    "electron-updater": "^2.21.8",
+    "ffi": "^2.2.0",
+    "source-map-support": "^0.5.4"
   }
 }

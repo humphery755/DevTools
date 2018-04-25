@@ -5,11 +5,11 @@
 #define EXAMPLE __declspec(dllexport)
 
 extern "C" {
-EXAMPLE int XAdd(int, int);
-}
+//EXAMPLE int XAdd(int, int);
 
-int XAdd(int a, int b){
+
+EXAMPLE int XAdd(int a, int b){
   return a+b;
 }
 
-
+}

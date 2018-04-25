@@ -19,7 +19,10 @@ all:
     link /debug /MACHINE:X64 /dll testdll.obj    
     link /out:main.exe *.obj /DYNAMICBASE "kernel32.lib"
     dumpbin -exports testdll.dll
+    $(CC) /D_USRDLL /D_WINDLL testdll.cc /link /debug /DLL /OUT:libtestdll.dll
+    dumpbin -exports libtestdll.dll
 #link  /out:testdll.lib testdll.obj
+#cl.exe /D_USRDLL /D_WINDLL factorial.c /link /DLL /OUT:libfactorial.dll
 
 clean:
  del *.obj *.exp *.ilk *.pdb *.res *.dll *.exe *.lib
