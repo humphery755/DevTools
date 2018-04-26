@@ -1,11 +1,12 @@
 {
   "name": "electron-quick-start",
-  "version": "1.0.0",
+  "version": "0.0.9",
   "description": "A minimal Electron application",
   "main": "main.js",
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
-    "start": "electron .",
+    "debug": "chcp 65001 && electron . --inspect --debug-brk --enable_logging",
+    "start": "chcp 65001 && electron . --enable_logging",
     "compile": "rimraf ./dist",
     "packg": "yarn compile && electron-builder --dir",
     "compile1": "asar pack src ./dist/win-ia32-unpacked/resources/app.asar",    
@@ -31,7 +32,7 @@
     "publish": [
       {
         "provider": "generic",
-        "url": "http://www.autoUpdaterUrl.com/"
+        "url": "https://github.com/humphery755/DevTools/releases/download/electron-quick-start/"
       }
     ],
     "dmg": {
@@ -65,11 +66,12 @@
     "electron-builder": "^20.10.0",
     "electron-webpack": "^2.0.1",
     "webpack": "^4.4.1",
-    "rimraf": "^2.6.2"
+    "rimraf": "^2.6.2",
+    "electron-log": "^2.2.14"
   },
   "dependencies": {
     "electron-updater": "^2.21.8",
     "ffi": "^2.2.0",
-    "source-map-support": "^0.5.4"
+    "source-map-support": "^0.5.4"    
   }
 }

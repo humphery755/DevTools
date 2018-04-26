@@ -5,14 +5,18 @@
     <title>Hello World!</title>
   </head>
   <body>
-    <h1>Hello World!</h1>
-	<button id="select-directory" >API-select-directory</button>
-	<button id="show-modal-dialog" >showModalDialog</button>
+    <h1>Hello World!</h1>	
     <!-- All of the Node.js APIs are available in this renderer process. -->
     We are using Node.js <script>document.write(process.versions.node)</script>,
     Chromium <script>document.write(process.versions.chrome)</script>,
     and Electron <script>document.write(process.versions.electron)</script>.
 
+<button id="select-directory" >API-select-directory</button><br/>
+  <button id="show-modal-dialog" >showModalDialog</button><br/>
+  <button id="child_process" >child-process</button><br/>
+	<button id="electron-updater" >electron-updater</button><br/>
+  <label id="tips" for="downloadPercent">进度：</label><progress value="0" max="100" id="downloadPercent"></progress>
+  
     <script>
       // You can also require other files to run in this process
 		require('./renderer.js')		
@@ -33,8 +37,64 @@
 		
 		const showModalDialog = document.getElementById('show-modal-dialog')
 		showModalDialog.addEventListener('click', function (event) {
-		  window.open("modal.html","... ...","width=400,height=150,scrollbars=0,toolbar=0,menubar=0,channelmode=1")
+		  window.open("modal.html","... ...","width=400,height=200,scrollbars=0,toolbar=0,menubar=0,channelmode=1")
 		})
     </script>
+    
+<script>
+//const ipc = require('electron').ipcRenderer
+//组件销毁前移除所有事件监听channel 为避免多次切换页面造成监听的滥用，切换页面前必须移除监听事件：
+//ipc.removeAll(["message", "downloadProgress", "isUpdateNow"]);
+
+const electronUpdater = document.getElementById('electron-updater')
+const tips = document.getElementById('tips')
+const downloadPercent = document.getElementById('downloadPercent')
+electronUpdater.addEventListener('click', function (event) {
+  ipc.send("checkForUpdate");
+})
+
+ipc.on("message", (event, text) => {
+   console.log(text);
+   tips.innerHTML = text;
+});
+ipc.on("downloadProgress", (event, progressObj)=> {
+   //alert("progress: "+downloadPercent.value);
+   downloadPercent.value = progressObj.percent || 0;
+});
+ipc.on("isUpdateNow", () => {
+   //console.log(progressObj);
+   ipc.send("isUpdateNow");
+});
+</script>
   </body>
 </html>
+<script>
+const child_process = require('child_process');
+
+const child_process_btn = document.getElementById('child_process')
+child_process_btn.addEventListener('click', function (event) {
+    const cmd = 'cmd'
+    const args = ['/c','dir']
+
+    var ls = child_process.spawn(cmd, args, {
+        // stdio: 'inherit',
+        cwd: __dirname
+      })
+    //const ls = child_process.spawn('ls', ['-l', '/']);
+    ls.stdout.on('data', (data) => {
+      console.log(`stdout: ${data}`);
+    });
+
+    ls.stderr.on('data', (data) => {
+      console.log(`stderr: ${data}`);
+    });
+
+    ls.on('close', (code) => {
+      console.log(`child process exited with code ${code}`);
+    });
+})
+
+
+
+
+</script>

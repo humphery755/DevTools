@@ -1,5 +1,6 @@
 # electron-quick-start
 
+cnpm install -g electron-log
 cnpm install -g node-gyp
 cnpm install --g --production windows-build-tools
 cnpm config set python python2.7

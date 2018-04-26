@@ -3,13 +3,15 @@ const electron = require('electron')
 const app = electron.app
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow
-
-// ×¢ÒâÕâ¸öautoUpdater²»ÊÇelectronÖĞµÄautoUpdater
-const autoUpdater = require('electron-updater')
-//import { autoUpdater } from "electron-updater"
+const dialog = electron.dialog
+const ipc = electron.ipcMain
+// æ³¨æ„è¿™ä¸ªautoUpdaterä¸æ˜¯electronä¸­çš„autoUpdater
+const autoUpdater = require('electron-updater').autoUpdater
+const uploadUrl = "https://github.com/humphery755/DevTools/releases/download/electron-quick-start/"//require("../renderer/config/config").uploadUrl;
 
 const path = require('path')
 const url = require('url')
+
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -50,6 +52,8 @@ function createWindow () {
     // when you should delete the corresponding element.
     mainWindow = null
   })
+  
+  updateHandle()
 }
 
 // This method will be called when Electron has finished
@@ -77,47 +81,72 @@ app.on('activate', function () {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 
-// ¼ì²â¸üĞÂ£¬ÔÚÄãÏëÒª¼ì²é¸üĞÂµÄÊ±ºòÖ´ĞĞ£¬rendererÊÂ¼ş´¥·¢ºóµÄ²Ù×÷×ÔĞĞ±àĞ´
+// æ£€æµ‹æ›´æ–°ï¼Œåœ¨ä½ æƒ³è¦æ£€æŸ¥æ›´æ–°çš„æ—¶å€™æ‰§è¡Œï¼Œrendereräº‹ä»¶è§¦å‘åçš„æ“ä½œè‡ªè¡Œç¼–å†™
+//Checking for update
+
 function updateHandle(){
     let message={
-      error:'¼ì²é¸üĞÂ³ö´í',
-      checking:'ÕıÔÚ¼ì²é¸üĞÂ¡­¡­',
-      updateAva:'¼ì²âµ½ĞÂ°æ±¾£¬ÕıÔÚÏÂÔØ¡­¡­',
-      updateNotAva:'ÏÖÔÚÊ¹ÓÃµÄ¾ÍÊÇ×îĞÂ°æ±¾£¬²»ÓÃ¸üĞÂ',
+      error:'æ£€æŸ¥æ›´æ–°å‡ºé”™',
+      checking:'æ­£åœ¨æ£€æŸ¥æ›´æ–°â€¦â€¦',
+      updateAva:'æ£€æµ‹åˆ°æ–°ç‰ˆæœ¬ï¼Œæ­£åœ¨ä¸‹è½½â€¦â€¦',
+      updateNotAva:'ç°åœ¨ä½¿ç”¨çš„å°±æ˜¯æœ€æ–°ç‰ˆæœ¬ï¼Œä¸ç”¨æ›´æ–°',
     };
     const os = require('os');
-    autoUpdater.setFeedURL('·Å×îĞÂ°æ±¾ÎÄ¼şµÄÎÄ¼ş¼ĞµÄ·şÎñÆ÷µØÖ·');
+    autoUpdater.logger = require("electron-log")
+    autoUpdater.logger.transports.file.level = "info"
+    autoUpdater.autoDownload = false
+    autoUpdater.setFeedURL(uploadUrl);//'æ”¾æœ€æ–°ç‰ˆæœ¬æ–‡ä»¶çš„æ–‡ä»¶å¤¹çš„æœåŠ¡å™¨åœ°å€');
     autoUpdater.on('error', function(error){
+      console.log(error);
       sendUpdateMessage(message.error)
     });
-    autoUpdater.on('checking-for-update', function() {
+    autoUpdater.on('checking-for-update', function(info) {
       sendUpdateMessage(message.checking)
     });
     autoUpdater.on('update-available', function(info) {
-        sendUpdateMessage(message.updateAva)
+      const options = {
+        type: "info",
+        title: "æ›´æ–°æç¤º",
+        message: "æœ‰æ–°ç‰ˆæœ¬éœ€è¦æ›´æ–°",
+        buttons: ["ç°åœ¨æ›´æ–°","ç¨å"]
+      }
+      dialog.showMessageBox(options, function(index) {
+        if (index == 0){
+          sendUpdateMessage(message.updateAva)
+          autoUpdater.downloadUpdate();
+        }
+      })
+        
     });
     autoUpdater.on('update-not-available', function(info) {
         sendUpdateMessage(message.updateNotAva)
     });
     
-    // ¸üĞÂÏÂÔØ½ø¶ÈÊÂ¼ş
+    // æ›´æ–°ä¸‹è½½è¿›åº¦äº‹ä»¶
     autoUpdater.on('download-progress', function(progressObj) {
+        //console.log(progressObj);
         mainWindow.webContents.send('downloadProgress', progressObj)
     })
     autoUpdater.on('update-downloaded',  function (event, releaseNotes, releaseName, releaseDate, updateUrl, quitAndUpdate) {
-        ipcMain.on('isUpdateNow', (e, arg) => {
+        ipc.on('isUpdateNow', (e, arg) => {
+            console.log(arg);
+            console.log("å¼€å§‹æ›´æ–°");
             //some code here to handle event
             autoUpdater.quitAndInstall();
         })
         mainWindow.webContents.send('isUpdateNow')
     });
-    
-    //Ö´ĞĞ×Ô¶¯¸üĞÂ¼ì²é
-    autoUpdater.checkForUpdates();
+    ipc.on("checkForUpdate",()=>{
+      //æ‰§è¡Œè‡ªåŠ¨æ›´æ–°æ£€æŸ¥
+      autoUpdater.checkForUpdates();
+    })
 }
 
-// Í¨¹ımain½ø³Ì·¢ËÍÊÂ¼ş¸ørenderer½ø³Ì£¬ÌáÊ¾¸üĞÂĞÅÏ¢
+// é€šè¿‡mainè¿›ç¨‹å‘é€äº‹ä»¶ç»™rendererè¿›ç¨‹ï¼Œæç¤ºæ›´æ–°ä¿¡æ¯
 // mainWindow = new BrowserWindow()
 function sendUpdateMessage(text){
+    //console.log(text);
     mainWindow.webContents.send('message', text)
 }
+
+
