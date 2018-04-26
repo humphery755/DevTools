@@ -7,6 +7,7 @@
   <body>
     <h1>Hello World!</h1>
 	<button id="select-directory" >API-select-directory</button>
+	<button id="show-modal-dialog" >showModalDialog</button>
     <!-- All of the Node.js APIs are available in this renderer process. -->
     We are using Node.js <script>document.write(process.versions.node)</script>,
     Chromium <script>document.write(process.versions.chrome)</script>,
@@ -29,7 +30,11 @@
 		ipc.on('selected-directory', function (event, path) {
 		  document.getElementById('selected-file').innerHTML = `You selected: ${path}`
 		})
-		    
+		
+		const showModalDialog = document.getElementById('show-modal-dialog')
+		showModalDialog.addEventListener('click', function (event) {
+		  window.open("modal.html","... ...","width=400,height=150,scrollbars=0,toolbar=0,menubar=0,channelmode=1")
+		})
     </script>
   </body>
 </html>
