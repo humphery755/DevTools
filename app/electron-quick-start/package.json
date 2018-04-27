@@ -27,7 +27,7 @@
     "copyright": "awen",
     "productName": "test",
     "files": ["main.js","main","renderer"],
-    "extraFiles": ["native/*.dll"],
+    "extraFiles": ["native/*.dll","native/*.exe"],
     "asar": true,
     "publish": [
       {

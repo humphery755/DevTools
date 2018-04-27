@@ -2,7 +2,8 @@
 
 cnpm install -g electron-log
 cnpm install -g node-gyp
-cnpm install --g --production windows-build-tools
+cnpm install -g --production windows-build-tools
+cnpm install -g iconv-lite
 cnpm config set python python2.7
 cnpm config set msvs_version 2017
 
@@ -40,8 +41,8 @@ cnpm install electron-updater --save
 yarn packg
 yarn dist
 
-ÈçºÎ½øÐÐ¸üÐÂ£¿
+ï¿½ï¿½Î½ï¿½ï¿½Ð¸ï¿½ï¿½Â£ï¿½
 
-¸Ä±äpackage.jsonÖÐµÄversionÊôÐÔ£¬ÀýÈç£º¸ÄÎª version: "1.0.1" (Ö®Ç°Îª1.0.0)£»
-ÔÙ´ÎÖ´ÐÐelectron-builder´ò°ü£¬½«ÐÂ°æ±¾latest.ymlÎÄ¼þºÍexeÎÄ¼þ·Åµ½package.jsonÖÐbuild -> publishÖÐµÄurl¶ÔÓ¦µÄµØÖ·ÏÂ£»
-ÔÚÓ¦ÓÃÖÐ´¥·¢¸üÐÂ¼ì²é£¬electron-updater×Ô¶¯»áÍ¨¹ý¶ÔÓ¦urlÏÂµÄymlÎÄ¼þ¼ì²é¸üÐÂ£»
+ï¿½Ä±ï¿½package.jsonï¿½Ðµï¿½versionï¿½ï¿½ï¿½Ô£ï¿½ï¿½ï¿½ï¿½ç£ºï¿½ï¿½Îª version: "1.0.1" (Ö®Ç°Îª1.0.0)ï¿½ï¿½
+ï¿½Ù´ï¿½Ö´ï¿½ï¿½electron-builderï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â°æ±¾latest.ymlï¿½Ä¼ï¿½ï¿½ï¿½exeï¿½Ä¼ï¿½ï¿½Åµï¿½package.jsonï¿½ï¿½build -> publishï¿½Ðµï¿½urlï¿½ï¿½Ó¦ï¿½Äµï¿½Ö·ï¿½Â£ï¿½
+ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½é£¬electron-updaterï¿½Ô¶ï¿½ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½Ó¦urlï¿½Âµï¿½ymlï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â£ï¿½

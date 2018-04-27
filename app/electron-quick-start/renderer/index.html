@@ -21,11 +21,12 @@
       // You can also require other files to run in this process
 		require('./renderer.js')		
 		const ipc = require('electron').ipcRenderer
-		const testdll = require('./user32').TestDLL
+		const user32 = require('../native/user32')
   
 		const selectDirBtn = document.getElementById('select-directory')
 
 		selectDirBtn.addEventListener('click', function (event) {
+      var testdll=user32.testdll
 		  console.log('testdll.XAdd(1,3): ' , testdll.XAdd(1,3)); 
 		  console.log('message from Main Process: ' , event); 
 		  ipc.send('open-file-dialog')
@@ -69,29 +70,21 @@ ipc.on("isUpdateNow", () => {
   </body>
 </html>
 <script>
-const child_process = require('child_process');
 
 const child_process_btn = document.getElementById('child_process')
+String.prototype.each=function(i,fun){
+  var index=0;
+  var that=this;
+  while(index<=that.length){
+    (fun||function(){})(that.substr(index,i))
+      index+=i;
+  }
+}
+
 child_process_btn.addEventListener('click', function (event) {
-    const cmd = 'cmd'
-    const args = ['/c','dir']
-
-    var ls = child_process.spawn(cmd, args, {
-        // stdio: 'inherit',
-        cwd: __dirname
-      })
-    //const ls = child_process.spawn('ls', ['-l', '/']);
-    ls.stdout.on('data', (data) => {
-      console.log(`stdout: ${data}`);
-    });
-
-    ls.stderr.on('data', (data) => {
-      console.log(`stderr: ${data}`);
-    });
-
-    ls.on('close', (code) => {
-      console.log(`child process exited with code ${code}`);
-    });
+    const url='https://github.com/humphery755/DevTools/archive/electron-quick-start.tar.gz'
+    const args = ['/c','dir','&&','dir']
+    user32.aria2c(url,'test.tar.gz');
 })
 
 
