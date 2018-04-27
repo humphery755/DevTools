@@ -1,4 +1,5 @@
 # electron-quick-start
+svn checkout https://github.com/humphery755/DevTools/trunk/app/electron-quick-start
 
 cnpm install -g electron-log
 cnpm install -g node-gyp
@@ -36,13 +37,8 @@ cnpm install -g yarn
 yarn add electron-builder --dev
 cnpm install -g electron-builder
 cnpm install electron-updater --save
-
+cnpm install -g fix-path
 
 yarn packg
 yarn dist
 
-��ν��и��£�
-
-�ı�package.json�е�version���ԣ����磺��Ϊ version: "1.0.1" (֮ǰΪ1.0.0)��
-�ٴ�ִ��electron-builder��������°汾latest.yml�ļ���exe�ļ��ŵ�package.json��build -> publish�е�url��Ӧ�ĵ�ַ�£�
-��Ӧ���д������¼�飬electron-updater�Զ���ͨ����Ӧurl�µ�yml�ļ������£�

@@ -26,8 +26,8 @@
     "appId": "com.electron.awen.hello",
     "copyright": "awen",
     "productName": "test",
-    "files": ["main.js","main","renderer"],
-    "extraFiles": ["native/*.dll","native/*.exe"],
+    "files": ["main.js","main","renderer","native/user32.js"],
+    "extraFiles": ["native/*.dll","native/aria2c.exe"],
     "asar": true,
     "publish": [
       {
@@ -66,12 +66,14 @@
     "electron-builder": "^20.10.0",
     "electron-webpack": "^2.0.1",
     "webpack": "^4.4.1",
-    "rimraf": "^2.6.2",
-    "electron-log": "^2.2.14"
+    "rimraf": "^2.6.2"
   },
   "dependencies": {
     "electron-updater": "^2.21.8",
     "ffi": "^2.2.0",
-    "source-map-support": "^0.5.4"    
+    "source-map-support": "^0.5.4",
+    "electron-log": "^2.2.14",
+    "iconv-lite": "^0.4.21",
+    "fix-path": "^2.1.0"
   }
 }

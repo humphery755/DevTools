@@ -26,7 +26,7 @@
 		const selectDirBtn = document.getElementById('select-directory')
 
 		selectDirBtn.addEventListener('click', function (event) {
-      var testdll=user32.testdll
+      var testdll=user32.TestDLL
 		  console.log('testdll.XAdd(1,3): ' , testdll.XAdd(1,3)); 
 		  console.log('message from Main Process: ' , event); 
 		  ipc.send('open-file-dialog')
@@ -63,8 +63,8 @@ ipc.on("downloadProgress", (event, progressObj)=> {
    downloadPercent.value = progressObj.percent || 0;
 });
 ipc.on("isUpdateNow", () => {
-   //console.log(progressObj);
-   ipc.send("isUpdateNow");
+  console.log("开始更新");
+  ipc.send("isUpdateNow");
 });
 </script>
   </body>
@@ -84,7 +84,8 @@ String.prototype.each=function(i,fun){
 child_process_btn.addEventListener('click', function (event) {
     const url='https://github.com/humphery755/DevTools/archive/electron-quick-start.tar.gz'
     const args = ['/c','dir','&&','dir']
-    user32.aria2c(url,'test.tar.gz');
+    //user32.aria2c(url,'test.tar.gz');
+    ipc.send("aria2c",url,'test.tar.gz')
 })
 
 

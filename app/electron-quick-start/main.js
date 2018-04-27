@@ -11,7 +11,7 @@ const uploadUrl = "https://github.com/humphery755/DevTools/releases/download/ele
 
 const path = require('path')
 const url = require('url')
-
+const user32 = require('./native/user32')
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -129,8 +129,7 @@ function updateHandle(){
     })
     autoUpdater.on('update-downloaded',  function (event, releaseNotes, releaseName, releaseDate, updateUrl, quitAndUpdate) {
         ipc.on('isUpdateNow', (e, arg) => {
-            console.log(arg);
-            console.log("开始更新");
+            console.log(arg);            
             //some code here to handle event
             autoUpdater.quitAndInstall();
         })
@@ -149,4 +148,6 @@ function sendUpdateMessage(text){
     mainWindow.webContents.send('message', text)
 }
 
-
+ipc.on("aria2c",(url,target)=>{
+  user32.aria2c(url,target);
+})
