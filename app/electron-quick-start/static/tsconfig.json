@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "noImplicitAny": true,
+    "removeComments": true,
+    "outDir": "out",
+    "newLine": "LF",
+    "noResolve": true,
+    "noEmitOnError": true,
+    "inlineSources": true,
+    "sourceMap": true,
+    "noUnusedLocals": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "node_modules/@types/*/*.d.ts",
+    "node_modules/electron/electron.d.ts",
+    "node_modules/electron-updater/out/*.d.ts",
+    "node_modules/electron-builder-http/out/*.d.ts",
+    "src/*.*",
+    "typings/**/*.d.ts"
+  ],
+  "exclude": [
+  ]
+}

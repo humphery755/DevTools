@@ -1,0 +1,12 @@
+.DS_Store
+dist/
+node_modules/
+thumbs.db
+*.dll
+*.obj
+*.exe
+*.lib
+*.exp
+*.pdb
+*.res
+*.ilk

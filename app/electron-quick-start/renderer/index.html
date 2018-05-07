@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Hello World!</title>
+  </head>
+  <body>
+    <h1>Hello World!</h1>	
+    <!-- All of the Node.js APIs are available in this renderer process. -->
+    We are using Node.js <script>document.write(process.versions.node)</script>,
+    Chromium <script>document.write(process.versions.chrome)</script>,
+    and Electron <script>document.write(process.versions.electron)</script>.
+
+<button id="select-directory" >API-select-directory</button><br/>
+  <button id="show-modal-dialog" >showModalDialog</button><br/>
+  <button id="child_process" >child-process</button><br/>
+	<button id="electron-updater" >electron-updater</button><br/>
+  <label id="tips" for="downloadPercent">进度：</label><progress value="0" max="100" id="downloadPercent"></progress>
+  
+    <script>
+      // You can also require other files to run in this process
+		require('./renderer.js')		
+		const ipc = require('electron').ipcRenderer
+		const user32 = require('../native/user32')
+  
+		const selectDirBtn = document.getElementById('select-directory')
+
+		selectDirBtn.addEventListener('click', function (event) {
+      var testdll=user32.TestDLL
+		  console.log('testdll.XAdd(1,3): ' , testdll.XAdd(1,3)); 
+		  console.log('message from Main Process: ' , event); 
+		  ipc.send('open-file-dialog')
+		})
+
+		ipc.on('selected-directory', function (event, path) {
+		  document.getElementById('selected-file').innerHTML = `You selected: ${path}`
+		})
+		
+		const showModalDialog = document.getElementById('show-modal-dialog')
+		showModalDialog.addEventListener('click', function (event) {
+		  window.open("modal.html","... ...","width=400,height=200,scrollbars=0,toolbar=0,menubar=0,channelmode=1")
+		})
+    </script>
+    
+<script>
+//const ipc = require('electron').ipcRenderer
+//组件销毁前移除所有事件监听channel 为避免多次切换页面造成监听的滥用，切换页面前必须移除监听事件：
+//ipc.removeAll(["message", "downloadProgress", "isUpdateNow"]);
+
+const electronUpdater = document.getElementById('electron-updater')
+const tips = document.getElementById('tips')
+const downloadPercent = document.getElementById('downloadPercent')
+electronUpdater.addEventListener('click', function (event) {
+  ipc.send("checkForUpdate");
+})
+
+ipc.on("message", (event, text) => {
+   console.log(text);
+   tips.innerHTML = text;
+});
+ipc.on("downloadProgress", (event, progressObj)=> {
+   //alert("progress: "+downloadPercent.value);
+   downloadPercent.value = progressObj.percent || 0;
+});
+ipc.on("isUpdateNow", () => {
+  console.log("开始更新");
+  ipc.send("isUpdateNow");
+});
+</script>
+  </body>
+</html>
+<script>
+
+const child_process_btn = document.getElementById('child_process')
+String.prototype.each=function(i,fun){
+  var index=0;
+  var that=this;
+  while(index<=that.length){
+    (fun||function(){})(that.substr(index,i))
+      index+=i;
+  }
+}
+
+child_process_btn.addEventListener('click', function (event) {
+    const url='https://github.com/humphery755/DevTools/archive/electron-quick-start.tar.gz'
+    const args = ['/c','dir','&&','dir']
+    //user32.aria2c(url,'test.tar.gz');
+    ipc.send("aria2c",url,'test.tar.gz')
+})
+
+
+
+
+</script>
