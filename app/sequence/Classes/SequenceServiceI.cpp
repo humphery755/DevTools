@@ -26,7 +26,7 @@ using namespace tddl::sequences;
 #define INCREMENT64 2
 #define SNOW_FLAKE 3
 
-static int retryTimes=3;
+static int retryTimes=5;
 
 
 static int getAlgorithmCfg(string name){
@@ -132,15 +132,15 @@ SequenceRange SequenceServiceI::nextValue(const ::std::string& name, ::Ice::Int 
 	//序列取完后向数据库重新申请序列取值范围，如失败则进行重试
 	int i=retryTimes;
 	do{
-		//告警日志，每超过10即输出一条日志
+		//告警日志，每超过3即输出一条日志
 		int value = currentRange->getAndIncrement(step,retSeqRange);
 		if(value==0){
-			LOG(INFO) << "SequenceRange{max="<< retSeqRange.max<<", min="<<retSeqRange.min<<"}";
+			LOG(INFO) << name << ": SequenceRange{max="<< retSeqRange.max<<", min="<<retSeqRange.min<<"}";
 			return retSeqRange;
 		}
-		VLOG_EVERY_N(1, 10) << name<< ": currentRange->getAndIncrement failed";	
+		VLOG_EVERY_N(1, 3) << name<< ": currentRange->getAndIncrement failed";	
 		i--;
 	}while(i>=0);
-	LOG(ERROR)  << "Retried too many times, retryTimes = "<<retryTimes;
+	LOG(ERROR) << name << ": Retried too many times, retryTimes = "<<retryTimes;
 	throw SequenceException("Retried too many times");
 }
