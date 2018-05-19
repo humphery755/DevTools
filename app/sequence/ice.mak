@@ -15,7 +15,7 @@ THIS_MAKEFILE := $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))
 RPATH_REL = ./ 
 OBJ_DIR ?= objs
 
-LIB_DIR = $(ICE_HOME)/lib/
+LIB_DIR = $(ICE_HOME)/lib64/
 BIN_DIR = bin
 
 INCLUDES += -I $(ICE_HOME)/include
