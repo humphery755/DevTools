@@ -7,7 +7,6 @@
 
 #include <Ice/Ice.h>
 #include <SequenceServiceI.h>
-#include <Freeze/Freeze.h>
 #include <stdio.h>
 #include <string>  
 #include <sstream>  

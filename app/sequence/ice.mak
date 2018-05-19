@@ -2,18 +2,20 @@ all: $(TARGET)
 
 CC = gcc
 CXX = g++
-CCFLAGS += -fPIC -pipe -W -Wall -Wpointer-arith -Wno-unused-parameter -DNDK_SET_VAR -Wno-unused-function -Wno-missing-field-initializers -D_POSIX_C_SOURCE=200112L --std=c99 -DNDK_SET_VAR
-CXXFLAGS += -Wno-deprecated -m64 -fvisibility=hidden -Wall -Werror -pthread -fPIC -MMD
+CCFLAGS += -fPIC -pipe -W -Wall -Wpointer-arith -Wno-unused-parameter -DNDK_SET_VAR -Wno-unused-function -Wno-missing-field-initializers -D_POSIX_C_SOURCE=200112L -DNDK_SET_VAR --std=c99
+CXXFLAGS += -Wno-deprecated -m64 -fvisibility=hidden -Wall -Werror -pthread -fPIC -MMD -std=c++03
+# -std=c++98
 ARFLAGS = cr
 
 DEFINES += -DLINUX
+# -D_GLIBCXX_USE_CXX11_ABI=0
 
 
 THIS_MAKEFILE := $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))
 RPATH_REL = ./ 
 OBJ_DIR ?= objs
 
-LIB_DIR = $(ICE_HOME)/lib64/
+LIB_DIR = $(ICE_HOME)/lib/
 BIN_DIR = bin
 
 INCLUDES += -I $(ICE_HOME)/include

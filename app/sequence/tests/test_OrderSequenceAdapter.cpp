@@ -131,7 +131,11 @@ int Tester::run(int argc, char** argv)
     try
     {
       prop->load(configFile);
-    }catch(const Ice::Exception& ex) {  Ice::Error out(Ice::getProcessLogger());  out <<__FILE__<<":"<< __LINE__<<" Ice::Exception:"<< ex;throw ex;}
+    }catch(const Ice::Exception& ex) {  
+      Ice::Error out(Ice::getProcessLogger());
+      out <<__FILE__<<":"<< __LINE__<<" Ice::Exception:"<< ex;
+      return -1;
+    }
     catch(...)
     {
       Ice::Error out(Ice::getProcessLogger());  out <<__FILE__<<":"<< __LINE__<<" unknown exception";

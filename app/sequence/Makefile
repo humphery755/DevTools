@@ -1,12 +1,12 @@
 # **********************************************************************
 # sudo yum install unixODBC unixODBC-devel
 # Copyright (c) 2003-2016 ZeroC, Inc. All rights reserved.
-#g++ -shared -rdynamic -m64 -fvisibility=hidden -Wall -Werror -pthread -fPIC -g -L/home/humphery/tmp/ice-3.6.3/cpp/lib64 -o libtdd_sequence_SequenceServiceI.so -Wl,-h,libtdd_sequence_SequenceServiceI.so   generated/tdd_sequence.o Classes/tdd_sequence_SequenceServiceI.o -lIceBox  -lIce -lIceUtil
+#g++ -shared -rdynamic -m64 -fvisibility=hidden -Wall -Werror -pthread -fPIC -g -L/home/humphery/tmp/ice-3.6.3/cpp/lib -o libtdd_sequence_SequenceServiceI.so -Wl,-h,libtdd_sequence_SequenceServiceI.so   generated/tdd_sequence.o Classes/tdd_sequence_SequenceServiceI.o -lIceBox  -lIce -lIceUtil
 # **********************************************************************
 MYSQL_HOME=/usr/local/mysqlconnector
 THIRDPARTY_HOME=/usr/local/thirdparty
 BENCHMARK_HOME=/usr/local/benchmark
-ICE_HOME=$(HOME)/Ice-3.6.3
+ICE_HOME=/usr/local/ice-3.7.1
 #ICE_HOME=/usr/local/ice-3.6.3
 GLOG_HOME=$(THIRDPARTY_HOME)/glog
 ZK_HOME=/usr/local/zkclient
@@ -21,7 +21,7 @@ GEN_SRC = $(wildcard ./generated/*.cpp)
 SOURCES =  $(shell find generated -regex '.*\.cpp\|.*\.c')	\
 	$(shell find Classes -regex '.*\.cpp\|.*\.c')
 
-SHAREDLIBS = -lIceBox $(BZIP2_RPATH_LINK) -lIce -lIceUtil -lFreeze -lIceGrid -lIceBox -L$(GLOG_HOME)/lib -lglog -L$(ZK_HOME)/lib -lzookeeper_mt -luuid -L$(MYSQL_HOME)/lib -lmysqlcppconn
+SHAREDLIBS = -lIceBox $(BZIP2_RPATH_LINK) -lIce -lIceGrid -lIceBox -L$(GLOG_HOME)/lib -lglog -L$(ZK_HOME)/lib -lzookeeper_mt -luuid -L$(MYSQL_HOME)/lib -lmysqlcppconn
 
 include ice.mak
 
@@ -44,31 +44,31 @@ $(TARGET): $(OBJECTS) $(CORE_MAKEFILE_LIST)
 	g++ -m64 -O0 -fPIC  $(LDFLAGS) -o lib$(TARGET).so $(OBJECTS) $(STATICLIBS) $(SHAREDLIBS) $(LIBS)
 
 server: $(OBJECTS) $(TEST_Server_OBJS)
-	g++  $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(OBJECTS) -L$(ICE_HOME)/lib64 $(SHAREDLIBS) -lGlacier2 -ldb_cxx-5.3 $(TEST_Server_OBJS) -L $(BENCHMARK_HOME)/lib  -lpthread -o server
-	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib64:$(MYSQL_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH):$(ZK_HOME)/lib ./server --Ice.Config=tests/config.service
+	g++  $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(OBJECTS) -L$(ICE_HOME)/lib $(SHAREDLIBS) -lGlacier2  $(TEST_Server_OBJS) -L $(BENCHMARK_HOME)/lib  -lpthread -o server
+	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib:$(MYSQL_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH):$(ZK_HOME)/lib ./server --Ice.Config=tests/config.service
 
 client: $(GEN_OBJS) $(TEST_Client_OBJS)
-	g++  $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(GEN_OBJS) -L$(ICE_HOME)/lib64 $(SHAREDLIBS) -lGlacier2 -ldb_cxx-5.3 $(TEST_Client_OBJS) -L $(BENCHMARK_HOME)/lib  -lpthread -lbenchmark -o test
-	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib64:$(BENCHMARK_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH):$(MYSQL_HOME)/lib ./test 50000 --benchmark_counters_tabular=true
-	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib64:$(BENCHMARK_HOME)/lib:$(MYSQL_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH) gdb ./test
+	g++  $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(GEN_OBJS) -L$(ICE_HOME)/lib $(SHAREDLIBS) -lGlacier2 -lGlacier2CryptPermissionsVerifier $(TEST_Client_OBJS) -L $(BENCHMARK_HOME)/lib  -lpthread -lbenchmark -o test
+	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib:$(BENCHMARK_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH):$(MYSQL_HOME)/lib ./test 50000 --benchmark_counters_tabular=true
+	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib:$(BENCHMARK_HOME)/lib:$(MYSQL_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH) gdb ./test
 
 
 testsf: $(GEN_OBJS) $(TEST_SnowflakeIdWorker_OBJS)
-	g++  $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(GEN_OBJS) -L$(ICE_HOME)/lib64 $(SHAREDLIBS) -lGlacier2 -ldb_cxx-5.3 \
+	g++  $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(GEN_OBJS) -L$(ICE_HOME)/lib $(SHAREDLIBS) -lGlacier2 \
 	$(TEST_SnowflakeIdWorker_OBJS) -I $(BENCHMARK_HOME)/include -L $(BENCHMARK_HOME)/lib  -lpthread -lbenchmark -o test
-	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib64:$(BENCHMARK_HOME)/lib:$(MYSQL_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH) ./test 2 --benchmark_counters_tabular=true
+	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib:$(BENCHMARK_HOME)/lib:$(MYSQL_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH) ./test 2 --benchmark_counters_tabular=true
 
 testd: $(GEN_OBJS) $(TEST_DefaultSequenceWorker_OBJS)
-	g++  $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(GEN_OBJS) -L$(ICE_HOME)/lib64 $(SHAREDLIBS) -lGlacier2 -ldb_cxx-5.3 \
+	g++  $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(GEN_OBJS) -L$(ICE_HOME)/lib $(SHAREDLIBS) -lGlacier2 \
 	$(TEST_DefaultSequenceWorker_OBJS) -L $(BENCHMARK_HOME)/lib  -lpthread -lbenchmark -o test
-	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib64:$(BENCHMARK_HOME)/lib:$(MYSQL_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH) ./test 10 --benchmark_counters_tabular=true
+	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib:$(BENCHMARK_HOME)/lib:$(MYSQL_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH) ./test 10 --benchmark_counters_tabular=true
 
 svcinstrument: $(GEN_OBJS)
 	g++ -finstrument-functions -Ltests/pvtrace -linstrument \
 	-finstrument-functions-exclude-file-list=$(ICE_HOME)/include,$(MYSQL_HOME)/include,$(GLOG_HOME)/include,$(ZK_HOME)/include,/usr/local/gcc-4.8.5,/usr/include \
 	$(CXXFLAGS) $(INCLUDES) $(DEFINES) tests/test_DefaultSequenceDao.cpp \
-	Classes/MySQLDBPool.cpp Classes/DefaultSequenceDao.cpp $(GEN_OBJS) -I $(BENCHMARK_HOME)/include -L $(BENCHMARK_HOME)/lib -L$(GLOG_HOME)/lib -L$(MYSQL_HOME)/lib -L$(ICE_HOME)/lib64 -lIce -lIceUtil -lIceBox -lmysqlcppconn -lglog -lpthread -lbenchmark -o testdao
-	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib64:$(BENCHMARK_HOME)/lib:$(MYSQL_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH):tests/pvtrace ./testdao 1000 --benchmark_counters_tabular=true
+	Classes/MySQLDBPool.cpp Classes/DefaultSequenceDao.cpp $(GEN_OBJS) -I $(BENCHMARK_HOME)/include -L $(BENCHMARK_HOME)/lib -L$(GLOG_HOME)/lib -L$(MYSQL_HOME)/lib -L$(ICE_HOME)/lib -lIce -lIceUtil -lIceBox -lmysqlcppconn -lglog -lpthread -lbenchmark -o testdao
+	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib:$(BENCHMARK_HOME)/lib:$(MYSQL_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH):tests/pvtrace ./testdao 1000 --benchmark_counters_tabular=true
 
 dbpool: $(TEST_DBPool_OBJS)
 	g++ $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(TEST_DBPool_OBJS) \
@@ -76,9 +76,9 @@ dbpool: $(TEST_DBPool_OBJS)
 	LD_LIBRARY_PATH=.:$(BENCHMARK_HOME)/lib:$(MYSQL_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH) ./test 1 --benchmark_counters_tabular=true
 
 testos: $(GEN_OBJS) $(TEST_OrderSequenceAdapter_OBJS)
-	g++  $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(GEN_OBJS) -L$(ICE_HOME)/lib64 $(SHAREDLIBS) -lGlacier2 -ldb_cxx-5.3 \
+	g++  $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(GEN_OBJS) -L$(ICE_HOME)/lib $(SHAREDLIBS) -lGlacier2  \
 	$(TEST_OrderSequenceAdapter_OBJS) -I $(BENCHMARK_HOME)/include -L $(BENCHMARK_HOME)/lib  -lpthread -lbenchmark -o test
-	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib64:$(BENCHMARK_HOME)/lib:$(MYSQL_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH) ./test 2 --benchmark_counters_tabular=true
+	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib:$(BENCHMARK_HOME)/lib:$(MYSQL_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH) ./test 2 --benchmark_counters_tabular=true
 
 tools:
 	g++ -g tests/SeqTools.cpp -o tools
@@ -104,3 +104,4 @@ GEN::
 	$(ICE_HOME)/bin/slice2cpp $(shell find slice -regex '.*\.ice') --output-dir generated/
 
 #$(ICE_HOME)/bin/slice2freeze --output-dir generated/ --dict StringSeqRangeMap,string,tddl::sequences::SequenceRangePO StringSeqRangeMap slice/tdd_sequence.ice
+

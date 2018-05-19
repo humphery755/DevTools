@@ -7,7 +7,6 @@
 
 #include <Ice/Ice.h>
 #include <SequenceServiceI.h>
-#include <Freeze/Freeze.h>
 #include <stdio.h>
 #include <string>  
 #include <sstream>  
@@ -57,7 +56,7 @@ void nextRange(string name,DefaultSequenceWorker* out){
 		LOG(ERROR) << "sequence name can't null";
 		throw SequenceException("sequence name can't null");
 	}
-	
+
 	//if(1==1)return;
 	//从线程池中取出连接（活动连接数＋1）  
 	multidb::Connection *con = multidb::MySQLDBPool::GetMySQLPool()->GetConnection(0);
@@ -71,7 +70,7 @@ void nextRange(string name,DefaultSequenceWorker* out){
 	static string strsql = "SELECT seq_nextval_v2(?)";
     try {
 		//执行SQL语句，返回结果集  
-		
+	
 		pstrm.m_con = con;
 		pstrm.m_pstmt = con->prepareStatement(strsql);
 		pstrm.m_pstmt->setString(1,name);

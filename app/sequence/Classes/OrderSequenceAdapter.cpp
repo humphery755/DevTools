@@ -186,6 +186,7 @@ static void unregister_4_registry(){
 }
 
 void startOrderSequence(const Ice::CommunicatorPtr& communicator, Ice::PropertiesPtr& _prop){
+    zk_helper = NULL;
     string strHosts = _prop->getPropertyWithDefault("seq.zookeeper.hosts","");
     if(strHosts.length()<5){
         LOG(ERROR) << ADAPTER_NAME <<" has not been registered: " << "seq.zookeeper.hosts is null";
@@ -209,7 +210,7 @@ void startOrderSequence(const Ice::CommunicatorPtr& communicator, Ice::Propertie
     int workerId = prop->getPropertyAsInt("seq.workerId");
 	int datacenterId = prop->getPropertyAsInt("seq.datacenterId");
     tddl::sequences::SequenceServicePtr orderSeqSvc = new SequenceServiceI(workerId,datacenterId);
-    if(adapter)adapter->add(orderSeqSvc, communicator->stringToIdentity(adapterName));
+    if(adapter)adapter->add(orderSeqSvc, Ice::stringToIdentity(adapterName));
 
     int err = pthread_create(&test_id, NULL, start_leader_election, NULL); 
     if ( 0 != err ) 
@@ -220,9 +221,12 @@ void startOrderSequence(const Ice::CommunicatorPtr& communicator, Ice::Propertie
 void stopOrderSequence(){
     LOG(INFO) << "The Adapter: " << adapterName << " be destroy." ;
     if(adapter)adapter->destroy();
-    destory_zookeeper_helper(zk_helper);
-    zk_helper = NULL;
-    pthread_kill(test_id,SIGINT);
-    unregister_4_registry();
+    if(zk_helper){
+        destory_zookeeper_helper(zk_helper);
+        zk_helper = NULL;
+        pthread_kill(test_id,SIGINT);
+        unregister_4_registry();
+    }
+    
     //pthread_join(test_id,NULL);
 }

@@ -73,8 +73,8 @@ int main(int argc, char** argv) {
     int algorithm = atoi(argv[2]);
     switch(algorithm){
         case INCREMENT64:
-        datacenterId = sequence >> sequenceBits64 & (-1 ^ (-1 << datacenterIdBits64));
-        sequence = (-1 ^ (-1 << sequenceBits64)) & sequence;
+        datacenterId = sequence >> sequenceBits64 & (-1l ^ (-1l << datacenterIdBits64));
+        sequence = (-1l ^ (-1l << sequenceBits64)) & sequence;
         std::cout << "datacenterId:" << datacenterId << ", sequence:" << sequence << std::endl;
         break;
         case INCREMENT32:

@@ -7,7 +7,7 @@
 
 #include <Ice/Ice.h>
 #include <SequenceServiceI.h>
-#include <Freeze/Freeze.h>
+//#include <Freeze/Freeze.h>
 #include <stdio.h>
 #include <string>  
 #include <sstream>  
@@ -78,19 +78,25 @@ static void initGlog(Ice::PropertiesPtr& prop){
 void
 SequenceServiceIcebox::start(const string& _name, const Ice::CommunicatorPtr& communicator, const Ice::StringSeq& args)
 {
-	Ice::PropertiesPtr prop = communicator->getProperties()->clone();//Ice::createProperties();
+	Ice::PropertiesPtr prop = communicator->getProperties()->clone();//Ice::createProperties();	
+	ostringstream propStrBuff;
+	propStrBuff<<"{";
+    Ice::PropertyDict dict = prop->getPropertiesForPrefix("");
+    for(Ice::PropertyDict::const_iterator p = dict.begin(); p != dict.end(); ++p)
+    {
+		propStrBuff << p->first << "="<<p->second << ",";
+    }
+	propStrBuff << "}";
+
 	string configFile = prop->getPropertyWithDefault("seq.configFile","conf/sequence.properties");
-	try
-	{
-		prop->load(configFile);
-	}catch(const Ice::Exception& ex) {  Ice::Error out(Ice::getProcessLogger());  out <<__FILE__<<":"<< __LINE__<<" Ice::Exception:"<< ex;throw ex;}
-	catch(...)
-	{
-		Ice::Error out(Ice::getProcessLogger());  out <<__FILE__<<":"<< __LINE__<<" unknown exception";
-		return;
+	prop->load(configFile);	
+	initGlog(prop);	
+	LOG(INFO) << "communicator->getProperties: " << propStrBuff.str();
+	string defaultHost = prop->getPropertyWithDefault("Ice.Default.Host","");
+	if(defaultHost.length()>5){
+		communicator->getProperties()->setProperty("Ice.Default.Host",defaultHost);
 	}
 
-	initGlog(prop);
 	if(!startTookits((void*)0))return;
 	
 	string strVersion = prop->getPropertyWithDefault("app.ver","");
@@ -99,10 +105,8 @@ SequenceServiceIcebox::start(const string& _name, const Ice::CommunicatorPtr& co
 	string strUrl = prop->getPropertyWithDefault("seq.database.driver.url","root/1@127.0.0.1:3306/test");
 	int minPoolSize = prop->getPropertyAsInt("seq.database.driver.minPoolSize");
 	int maxPoolSize = prop->getPropertyAsInt("seq.database.driver.maxPoolSize");
-	LOG(INFO) << "driverUrl = " << strUrl << ", minPoolSize=" << minPoolSize<< ", maxPoolSize=" << maxPoolSize;
 
 	if(!multidb::MySQLDBPool::GetMySQLPool()->RegistDataBase(0,strUrl.c_str(),minPoolSize,maxPoolSize))return;
-	LOG(INFO) <<  "MySQLDBPool RegistDataBase success.";
 	if(!multidb::MySQLDBPool::GetMySQLPool()->Startup())return;
 	LOG(INFO) <<  "MySQLDBPool startup success.";
 
@@ -116,7 +120,7 @@ SequenceServiceIcebox::start(const string& _name, const Ice::CommunicatorPtr& co
 	int workerId = prop->getPropertyAsInt("seq.workerId");
 	int datacenterId = prop->getPropertyAsInt("seq.datacenterId");
 	tddl::sequences::SequenceServicePtr seqSvc = new SequenceServiceI(workerId,datacenterId);
-	_adapter->add(seqSvc, communicator->stringToIdentity(_adapter->getName()));
+	_adapter->add(seqSvc, Ice::stringToIdentity(_adapter->getName()));
 	LOG(INFO) << "The Adapter:" << _adapter->getName() << " will be activated.";
 	_adapter->activate();	
 }

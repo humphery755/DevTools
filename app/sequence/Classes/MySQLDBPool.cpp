@@ -231,8 +231,7 @@ static bool spliteStr(const char* constr,multidb::ConnectOptions *connOpt)
 		strcpy(connOpt->schema, p);
 	}else{
 		return false;
-	}
-	LOG(INFO) << "dbcfg parse success: " << connOpt->user << "/******(" << strlen(connOpt->pass) << ")@" << connOpt->hostName << ":"<< connOpt->port << "/" << connOpt->schema;
+	}	
 	return true;
 }
 
@@ -317,6 +316,8 @@ bool multidb::MySQLSingleDBPool::InitPool()
 		LOG(ERROR) << "dbcfg minSize > maxSize";
 		return false;
 	}
+
+	LOG(INFO) << "dbcfg parse success: " << connOpt.user << "/******(" << strlen(connOpt.pass) << ")@" << connOpt.hostName << ":"<< connOpt.port << "/" << connOpt.schema << ", minPoolSize=" << connOpt.min << ", maxPoolSize=" << connOpt.max;
 
 	m_driver = sql::mysql::get_mysql_driver_instance();
 
@@ -431,4 +432,3 @@ int multidb::MySQLSingleDBPool::CheckConnection()
 	}
 	return 0;
 }
-

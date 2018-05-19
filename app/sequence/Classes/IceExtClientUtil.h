@@ -24,12 +24,13 @@ public:
 	template<class T> T stringToProxy(T,std::string& id);
 	//Ice::CommunicatorPtr communicator(){return _communicator;}
 	virtual std::string getProperty(std::string& k,std::string& v);
-	virtual std::string getAppName();
+	virtual std::string getAppName(){return this->_appName;}
 	virtual Ice::PropertiesPtr getProperties(){return prop;}
 	IceClientUtil(std::string,std::string);
 
 	
 private:
+	std::string 								_appName;
 	static IceClientUtil* 						m_pInstance;
 	Ice::PropertiesPtr 							prop;
 	CommunicatorProxyI* 						_communicator;
@@ -82,4 +83,3 @@ template<class T> T IceClientUtil::stringToProxy(T,std::string& id)
 
 }
 #endif
-

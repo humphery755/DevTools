@@ -11,10 +11,10 @@
 #
 app.ver=-Test
 
-Ice.Default.Locator=DemoIceGrid/Locator:tcp -h 192.168.1.11 -p 4066
-#Ice.Default.Router=DemoGlacier2/router:tcp -h 192.168.1.2 -p 5064|test/passwd
-#ExtIce.TEST.Router=DemoGlacier2/router:tcp -h 192.168.1.2 -p 5064|T1/passwd
-#ExtIce.TEST1.Router=DemoGlacier2/router:tcp -h 192.168.1.2 -p 5064|T2/passwd
+Ice.Default.Locator=DemoIceGrid/Locator:tcp -h 127.0.0.1 -p 4061
+#Ice.Default.Router=DemoGlacier2/router:tcp -h 127.0.0.1 -p 5064|test/passwd
+#ExtIce.TEST.Router=DemoGlacier2/router:tcp -h 127.0.0.1 -p 5064|T1/passwd
+#ExtIce.TEST1.Router=DemoGlacier2/router:tcp -h 127.0.0.1 -p 5064|T2/passwd
 Ice.Default.LocatorCacheTimeout=120
 
 #

@@ -4,7 +4,6 @@
 #include <Glacier2/Router.h>
 #include <Glacier2/Application.h>
 #include <IceUtil/Exception.h>
-//#include <glog/logging.h>
 #include "Toolkits.h"
 #include "IceExtClientUtil.h"
 
@@ -257,14 +256,12 @@ Ice::ObjectPrx Glacier2Communicator::stringToProxy(string& id)
     timedWait(IceUtil::Time::seconds(30));
 
     if(_initialized){
-        //Lock sync(*this);
         return _communicator->stringToProxy(svcId.empty()?id:svcId);
     }
     return NULL;
 }
 
-IceClientUtil::IceClientUtil(std::string appName,std::string configFile){
-    IceInternal::Application::_appName = appName;
+IceClientUtil::IceClientUtil(std::string appName,std::string configFile):_appName(appName){
     InitializationData initData;
     initData.properties = createProperties();      
     initData.properties->load(configFile);
@@ -272,8 +269,6 @@ IceClientUtil::IceClientUtil(std::string appName,std::string configFile){
 }
 
 std::string IceClientUtil::getProperty(std::string& k,std::string& v){return prop->getPropertyWithDefault(k,v);}
-
-std::string IceClientUtil::getAppName(){return IceInternal::Application::_appName;}
 
 int IceClientUtil::initialize()
 {
