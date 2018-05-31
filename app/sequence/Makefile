@@ -7,7 +7,7 @@ MYSQL_HOME=/usr/local/mysqlconnector
 THIRDPARTY_HOME=/usr/local/thirdparty
 BENCHMARK_HOME=/usr/local/benchmark
 ICE_HOME=/usr/local/ice-3.7.1
-#ICE_HOME=/usr/local/ice-3.6.3
+OPENSSL_HOME=/usr/local/openssl-1.0.2k
 GLOG_HOME=$(THIRDPARTY_HOME)/glog
 ZK_HOME=/usr/local/zkclient
 LDFLAGS := -shared -rdynamic -m64 -fvisibility=hidden -Wall -Werror -pthread -fPIC
@@ -21,7 +21,7 @@ GEN_SRC = $(wildcard ./generated/*.cpp)
 SOURCES =  $(shell find generated -regex '.*\.cpp\|.*\.c')	\
 	$(shell find Classes -regex '.*\.cpp\|.*\.c')
 
-SHAREDLIBS = -lIceBox $(BZIP2_RPATH_LINK) -lIce -lIceGrid -lIceBox -L$(GLOG_HOME)/lib -lglog -L$(ZK_HOME)/lib -lzookeeper_mt -luuid -L$(MYSQL_HOME)/lib -lmysqlcppconn
+SHAREDLIBS = -lIceBox $(BZIP2_RPATH_LINK) -lIce -lIceGrid -lIceBox -L$(GLOG_HOME)/lib -lglog -L$(ZK_HOME)/lib -lzookeeper_mt -luuid -L$(MYSQL_HOME)/lib -lmysqlcppconn -L$(OPENSSL_HOME)/lib -lssl
 
 include ice.mak
 
@@ -49,7 +49,7 @@ server: $(OBJECTS) $(TEST_Server_OBJS)
 
 client: $(GEN_OBJS) $(TEST_Client_OBJS)
 	g++  $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(GEN_OBJS) -L$(ICE_HOME)/lib64 $(SHAREDLIBS) -lGlacier2 -lGlacier2CryptPermissionsVerifier $(TEST_Client_OBJS) -L $(BENCHMARK_HOME)/lib  -lpthread -lbenchmark -o test
-	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib:$(BENCHMARK_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH):$(MYSQL_HOME)/lib:$(ZK_HOME)/lib ./test 50000 --benchmark_counters_tabular=true
+	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib:$(BENCHMARK_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH):$(MYSQL_HOME)/lib:$(ZK_HOME)/lib ./test 5 --benchmark_counters_tabular=true
 	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib:$(BENCHMARK_HOME)/lib:$(MYSQL_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH) gdb ./test
 
 
@@ -72,8 +72,8 @@ svcinstrument: $(GEN_OBJS)
 
 dbpool: $(TEST_DBPool_OBJS)
 	g++ $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(TEST_DBPool_OBJS) \
-	-L $(BENCHMARK_HOME)/lib -L$(GLOG_HOME)/lib -L$(MYSQL_HOME)/lib -lmysqlcppconn -lglog -lpthread -lbenchmark -o test
-	LD_LIBRARY_PATH=.:$(BENCHMARK_HOME)/lib:$(MYSQL_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH) ./test 1 --benchmark_counters_tabular=true
+	-L $(BENCHMARK_HOME)/lib -L$(GLOG_HOME)/lib -L$(MYSQL_HOME)/lib -lmysqlcppconn -L$(OPENSSL_HOME)/lib -lssl -lcrypto -lglog -lpthread -lbenchmark -o test
+	LD_LIBRARY_PATH=.:$(BENCHMARK_HOME)/lib:$(MYSQL_HOME)/lib:$(GLOG_HOME)/lib:$(OPENSSL_HOME)/lib:$(LD_LIBRARY_PATH) ./test 1 --benchmark_counters_tabular=true
 
 testos: $(GEN_OBJS) $(TEST_OrderSequenceAdapter_OBJS)
 	g++  $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(GEN_OBJS) -L$(ICE_HOME)/lib64 $(SHAREDLIBS) -lGlacier2  \

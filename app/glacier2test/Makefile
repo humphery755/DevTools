@@ -8,8 +8,7 @@ THIRDPARTY_HOME=/usr/local/thirdparty
 BENCHMARK_HOME=/usr/local/benchmark
 ZDB_HOME=$(THIRDPARTY_HOME)/libzdb
 SSL_LIB=/usr/local/openssl-1.1.0e/lib
-ICE_HOME=$(HOME)/Ice-3.6.3
-#ICE_HOME=/usr/local/ice-3.6.3
+ICE_HOME=/usr/local/ice-3.7.1
 GLOG_HOME=$(THIRDPARTY_HOME)/glog
 LDFLAGS := -shared -rdynamic -m64 -fvisibility=hidden -Wall -Werror -pthread -fPIC -g
 DEBUG=1
@@ -20,47 +19,43 @@ GEN_SRC = $(wildcard ./generated/*.cpp)
 SOURCES =  $(shell find generated -regex '.*\.cpp\|.*\.c')	\
 	$(shell find Classes -regex '.*\.cpp\|.*\.c')
 
-SHAREDLIBS = -lIceBox $(BZIP2_RPATH_LINK) -lIce -lIceUtil -lFreeze -lIceGrid -lIceBox -L$(MYSQL_HOME)/lib -lmysqlclient -L$(ZDB_HOME)/lib -lzdb -L$(GLOG_HOME)/lib -lglog
+SHAREDLIBS = -lIceBox $(BZIP2_RPATH_LINK) -lIce -lIceGrid -lGlacier2 -lIceSSL -L$(MYSQL_HOME)/lib -L$(GLOG_HOME)/lib -lglog -lcurl
 
 include ice.mak
 
-INCLUDES=-Iobjs -Igenerated -IClasses -I$(ICE_HOME)/include -I$(MYSQL_HOME)/include -I$(ZDB_HOME)/include -I$(ZDB_HOME)/include/zdb -I$(GLOG_HOME)/include	
+INCLUDES=-Iobjs -Igenerated -IClasses -I$(ICE_HOME)/include -I$(MYSQL_HOME)/include -I$(GLOG_HOME)/include -I$(BENCHMARK_HOME)/include
 #INCLUDES=-I$(ICE_HOME)/include -I$(MYSQLCON)/include -I$(PUBLICFUNC)/include -I$(LIBREDIS) -I$(REDISCLIENT)/ -I$(DATACACHEPRO)/include -I$(CURL)/include/curl -I$(BOOST) -I$(GLOG_HOME)/include -I$(COMMROOT)
 
 GEN_OBJS	= $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(GEN_SRC))
+TEST_Client_OBJS	= $(patsubst %.cpp, $(OBJ_DIR)/%.o, Classes/Toolkits.cpp Classes/IceExtClientUtil.cpp tests/Client.cpp)
+TEST_Server_OBJS	= $(patsubst %.cpp, $(OBJ_DIR)/%.o, tests/Server.cpp)
+TEST_Benchmark_OBJS	= $(patsubst %.cpp, $(OBJ_DIR)/%.o, Classes/Toolkits.cpp Classes/IceExtClientUtil.cpp tests/Benchmark.cpp)
 #STATICLIBS += -L$(LOG4C_HOME)/lib/liblog4c.a
 
 ####### Build rules
 $(TARGET): $(OBJECTS) $(CORE_MAKEFILE_LIST)
 	@mkdir -p $(@D)
-	g++ -m64 -O0 -fPIC  $(LDFLAGS) -o lib$(TARGET).so $(OBJECTS) $(STATICLIBS) $(SHAREDLIBS) $(LIBS)
+	g++ -m64 -O0 -fPIC  $(LDFLAGS) -o lib/lib$(TARGET).so $(OBJECTS) $(STATICLIBS) $(SHAREDLIBS) $(LIBS)
 
-client: $(GEN_OBJS)
-	rm -rf client*
-	g++  $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(GEN_OBJS) -Itests -L$(ICE_HOME)/lib64 $(SHAREDLIBS) -lGlacier2 -ldb_cxx-5.3 tests/Client.cpp Classes/IceExtClientUtil.cpp -I $(BENCHMARK_HOME)/include -L $(BENCHMARK_HOME)/lib  -lpthread -lbenchmark -o client
+benchmark: clean $(GEN_OBJS) $(TEST_Benchmark_OBJS)
+	g++  $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(GEN_OBJS) $(TEST_Benchmark_OBJS) -L$(ICE_HOME)/lib64 $(SHAREDLIBS) -L $(BENCHMARK_HOME)/lib  -lpthread -lbenchmark -o benchmark
+	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib64:$(BENCHMARK_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH):$(MYSQL_HOME)/lib ./benchmark 5 --benchmark_counters_tabular=true
 
-t: 
-	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib64:$(BENCHMARK_HOME)/lib:$(ZDB_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH):$(SSL_LIB) ./client 1 --benchmark_counters_tabular=true
+client: clean $(GEN_OBJS) $(TEST_Client_OBJS)
+	g++  $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(GEN_OBJS) $(TEST_Client_OBJS) -L$(ICE_HOME)/lib64 $(SHAREDLIBS) -L $(BENCHMARK_HOME)/lib  -lpthread -lbenchmark -o client
+	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib64:$(BENCHMARK_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH):$(MYSQL_HOME)/lib ./client 5 --benchmark_counters_tabular=true
 
 gdb: 
 	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib64:$(BENCHMARK_HOME)/lib:$(ZDB_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH):$(SSL_LIB) gdb ./client -x gdbinit
 
-test:$(GEN_OBJS) 
-	#g++ -m64 -O0 -fPIC  $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(STATICLIBS) $(SHAREDLIBS) $(LIBS) tests/create.cpp
-	g++  $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(SHAREDLIBS) $(GEN_OBJS) -L$(ICE_HOME)/lib64 -lGlacier2 -lIce -lIceUtil -lFreeze -ldb_cxx-5.3 tests/Client.cpp Classes/IceExt_IceClientUtil.cpp Classes/dbutil.cpp Classes/DefaultSequenceDao.cpp -I $(BENCHMARK_HOME)/include -L $(BENCHMARK_HOME)/lib  -lpthread -lbenchmark -o client
-	#LD_LIBRARY_PATH=.:$(ICE_HOME)/lib64:$(BENCHMARK_HOME)/lib:$(ZDB_HOME)/lib:$LD_LIBRARY_PATH ./client 10 --benchmark_counters_tabular=true
-
-db:$(GEN_OBJS)
-	g++  $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(SHAREDLIBS) $(GEN_OBJS) -L$(ICE_HOME)/lib64 -lGlacier2 -lIce -lIceUtil -lFreeze -ldb_cxx-5.3 tests/Dbtest.cpp tests/IceExt_IceClientUtil.cpp Classes/dbutil.cpp Classes/DefaultSequenceDao.cpp -I $(BENCHMARK_HOME)/include -L $(BENCHMARK_HOME)/lib  -lpthread -lbenchmark -o dbtest
-	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib64:$(BENCHMARK_HOME)/lib:$(ZDB_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH) ./dbtest 10 --benchmark_counters_tabular=true
-##@echo "$(LOG_LINK)$(CXX) $(CXXFLAGS) $(OBJECTS) -o $@ $(SHAREDLIBS) $(STATICLIBS) $(LIBS)"
-##$(LOG_LINK)$(CXX) $(CXXFLAGS) $(OBJECTS) -o $@ $(SHAREDLIBS) $(STATICLIBS) $(LIBS)
-server: $(GEN_OBJS)
-	g++  $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(GEN_OBJS) -L$(ICE_HOME)/lib64 $(SHAREDLIBS) -lGlacier2 -ldb_cxx-5.3 tests/Server.cpp Classes/IceExtClientUtil.cpp Classes/SessionServerI.cpp -I $(BENCHMARK_HOME)/include -L $(BENCHMARK_HOME)/lib  -lpthread -lbenchmark -o server
+server: $(OBJECTS) $(TEST_Server_OBJS)
+	g++  $(CXXFLAGS) $(INCLUDES) $(DEFINES) $(OBJECTS) $(TEST_Server_OBJS) -L$(ICE_HOME)/lib64 $(SHAREDLIBS) -I $(BENCHMARK_HOME)/include -L $(BENCHMARK_HOME)/lib  -lpthread -lbenchmark -o server
 	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib64:$(BENCHMARK_HOME)/lib:$(ZDB_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH):$(SSL_LIB) ./server
 
-x: $(GEN_OBJS)
-	LD_LIBRARY_PATH=.:$(ICE_HOME)/lib64:$(BENCHMARK_HOME)/lib:$(ZDB_HOME)/lib:$(GLOG_HOME)/lib:$(LD_LIBRARY_PATH) ./server
+
+clean:
+	rm -rf client* *.o $(OBJ_DIR)/*.o
+
 ####### Compile
 $(OBJ_DIR)/%.o: ../%.cpp $(CORE_MAKEFILE_LIST)
 	@mkdir -p $(@D)
@@ -77,6 +72,7 @@ $(OBJ_DIR)/%.o: %.c $(CORE_MAKEFILE_LIST)
 	@mkdir -p $(@D)
 	@echo "$(LOG_CC)$(CC) $(CCFLAGS) $(INCLUDES) $(DEFINES) -c $< -o $@"
 	$(LOG_CC)$(CC) $(CCFLAGS) $(INCLUDES) $(DEFINES) -c $< -o $@
+
 
 GEN::
 	$(ICE_HOME)/bin/slice2cpp --help

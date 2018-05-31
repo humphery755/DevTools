@@ -21,7 +21,7 @@ using namespace std;
 
 multidb::MySQLDBPool multidb::MySQLDBPool::m_Pool;
 pthread_mutex_t pool_lock = PTHREAD_MUTEX_INITIALIZER;
-static int CHECK_INTERVAL=60; //检测时间间隔 120 second
+static int CHECK_INTERVAL=120; //检测时间间隔 120 second
 
 void* multidb::MySQLDBPool::PoolCheckThFunc(void * pParam)
 {
@@ -148,7 +148,7 @@ multidb::Connection* multidb::MySQLDBPool::GetConnection(int dbid)
 }
 
 
-void multidb::MySQLDBPool::FreeConnection(Connection *pConn,bool bConngood)
+void multidb::MySQLDBPool::FreeConnection(Connection *pConn)
 {
 	std::map<int,multidb::MySQLSingleDBPool*>::iterator iter;
 	if (NULL == pConn)
@@ -172,7 +172,7 @@ void multidb::MySQLDBPool::FreeConnection(Connection *pConn,bool bConngood)
 		delete pConn;
 		return;
 	}
-	iter->second->ReleaseConnect(pConn,bConngood);
+	iter->second->ReleaseConnect(pConn);
 }
 
 /****************************************************************************************
@@ -246,7 +246,7 @@ multidb::MySQLSingleDBPool::MySQLSingleDBPool(const char* connstr,int min,int ma
 	connOpt.ctimeout=30;
 	connOpt.rtimeout=60;
 	connOpt.wtimeout=30;
-	connOpt.expiretime=120;
+	connOpt.expiretime=240;
 	runing=false;
 	usedConns=0;
 }
@@ -374,14 +374,14 @@ multidb::Connection* multidb::MySQLSingleDBPool::GetConnection()
 	return NULL;
 }
 
-void multidb::MySQLSingleDBPool::ReleaseConnect(Connection *pConn,bool bConngood)
+void multidb::MySQLSingleDBPool::ReleaseConnect(Connection *pConn)
 {
 	if (NULL == pConn)
 	{
 		return;
 	}
 
-	if(runing && (bConngood || !pConn->isErr)){
+	if(runing && !pConn->isErr){
 		pConn->lastTime = getCurrentTime();
 		Lock l(&lock);
 		freeQueue.push(pConn);
@@ -405,13 +405,15 @@ int multidb::MySQLSingleDBPool::CheckConnection()
 	{
 		Lock l(&lock);
 		int count = freeQueue.size();
+		//LOG(ERROR) << "freeQueue size: " << count;
 		while(count > connOpt.min)
 		{
 			pconn = freeQueue.front();
 			if (pconn==NULL)
 			{
-				return 0;
+				break;
 			}
+			//LOG(ERROR) << "curTime:" << curTime << ",lastTime: " << pconn->lastTime << ",expiretime: " << connOpt.expiretime;
 			if(curTime - pconn->lastTime < connOpt.expiretime){
 				break;
 			}
@@ -421,6 +423,7 @@ int multidb::MySQLSingleDBPool::CheckConnection()
 			--count;
 		}
 	}
+	//LOG(ERROR) << "connection idle: " << tmpQueue.size();
 	while(!tmpQueue.empty())
 	{
 		pconn = tmpQueue.front();
@@ -428,6 +431,49 @@ int multidb::MySQLSingleDBPool::CheckConnection()
 		LOG(INFO) << "connection "<< pconn <<" idle["<<curTime - pconn->lastTime<<"] be closed";
 		pconn->close();
 		delete pconn;
+		pconn = NULL;
+	}
+
+	curTime = getCurrentTime();
+	{
+		Lock l(&lock);
+		//LOG(ERROR) << "checking queue size: " << freeQueue.size();
+		while(!freeQueue.empty())
+		{
+			pconn = freeQueue.front();
+			if (pconn==NULL)
+			{
+				break;
+			}
+			//LOG(ERROR) << "curTime:" << curTime << ",lastTime: " << pconn->lastTime << ",expiretime: " << connOpt.expiretime;
+			if(curTime - pconn->lastTime < connOpt.expiretime){
+				break;
+			}
+			freeQueue.pop();
+			__sync_add_and_fetch(&usedConns,-1);
+			tmpQueue.push(pconn);
+		}
+	}
+	static string strsql = "SELECT 1";
+	while(!tmpQueue.empty())
+	{
+		pconn = tmpQueue.front();
+		tmpQueue.pop();
+		multidb::ProxStream pstrm;		
+		try {
+			pstrm.m_con = pconn;
+			pstrm.m_stmt = pconn->createStatement();	
+			pstrm.m_res =pstrm.m_stmt->executeQuery(strsql);
+			if (pstrm.m_res->next()){
+				//LOG(ERROR) << "checking success.";
+				continue;
+			}
+		}
+		catch(sql::SQLException& ex)
+		{
+				LOG(ERROR) << "SQLException [" << ex.getErrorCode() << "] errmsg["<< ex.what() <<"]";
+				pconn->isErr=true;
+		}
 		pconn = NULL;
 	}
 	return 0;

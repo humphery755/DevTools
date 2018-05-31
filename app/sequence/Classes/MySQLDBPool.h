@@ -76,6 +76,7 @@ namespace multidb
 		Connection(ConnectOptions *opt,sql::Connection *con){connOpt=opt;conn=con;autoCommitCache=true;isErr=false;}
 		virtual ~Connection() {delete conn;};
 		virtual sql::PreparedStatement * prepareStatement(const sql::SQLString& _sql){return conn->prepareStatement(_sql);}
+		virtual sql::Statement * createStatement(){return conn->createStatement();}
 		virtual const sql::SQLWarning * getWarnings(){return conn->getWarnings();}
 		virtual void close() {conn->close();}
 		virtual void setSchema(const sql::SQLString& catalog){conn->setSchema(catalog);}

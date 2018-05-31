@@ -32,6 +32,7 @@ SequenceWorker *currentRange;
 /**
  * 查看重复脚本
  * perl -n -e 'if ( /^\s*$/){print; next}; $v=substr($_,-37); if (exists($hash{$v})) { print } else { $hash{$v}=1; next }' logs/test_Default.INFO
+ * perl -n -e 'if ( /^\s*$/){print; next}; $v=substr($_,46); if (exists($hash{$v})) { print } else { $hash{$v}=1; next }' logs/test_Default.INFO
  */
 static void BM_HelloService_echo(benchmark::State& state) {
 

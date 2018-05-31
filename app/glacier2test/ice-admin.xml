@@ -87,3 +87,149 @@
 
    </application>
 </icegrid>
+
+
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- This file was written by IceGrid Admin -->
+<icegrid>
+   <application name="Test_SEQTEST">
+    <server-template id="Glacier2">
+            <parameter name="index" default="0"/>
+            <server id="srv.Glacier2Router.${index}" activation="always" exe="glacier2router">
+                <properties>
+                    <property name="Glacier2.InstanceName" value="DemoGlacier2"/>
+                    <property name="Glacier2.Client.Endpoints" value="tcp -p 5064"/>
+                    <property name="Glacier2.Server.Endpoints" value="tcp"/>
+                    <property name="Glacier2.SessionTimeout" value="60"/>
+                    <property name="Glacier2.AddConnectionContext" value="1"/>
+                    <property name="Glacier2.Client.ForwardContext" value="1"/>
+                    <property name="Glacier2.Server.ForwardContext" value="1"/>
+                    <property name="Glacier2.RoutingTable.MaxSize" value="1000000"/>
+
+                    <property name="Glacier2.SessionManager" value="RouterSessionManager"/>
+                    <property name="Glacier2.SessionManager.LocatorCacheTimeout" value="30"/>
+                    <property name="Glacier2.PermissionsVerifier" value="RouterPermissionsVerifier"/>
+
+                </properties>
+            </server>
+    </server-template>
+    <server-template id="AdminSSLGlacier2">
+        <parameter name="index" default="0"/>
+         <server id="srv.AdminSSLGlacier2Router.${index}" activation="always" exe="glacier2router">
+            <properties>
+                <property name="Glacier2.InstanceName" value="AdminGlacier2"/>
+                <property name="Glacier2.Client.Endpoints" value="ssl -p 6066"/>
+                <property name="Glacier2.Server.Endpoints" value="tcp"/>
+                <property name="Glacier2.SessionTimeout" value="60"/>
+                <property name="Glacier2.AddConnectionContext" value="1"/>
+                <property name="Glacier2.Client.ForwardContext" value="1"/>
+                <property name="Glacier2.Server.ForwardContext" value="1"/>
+                <property name="Glacier2.RoutingTable.MaxSize" value="1000000"/>                    
+                <property name="Glacier2.SessionManager.LocatorCacheTimeout" value="30"/>            
+                <property name="Glacier2.SessionManager" value="RouterSessionManager"/>
+                <property name="Glacier2.PermissionsVerifier" value="RouterPermissionsVerifier"/>
+                    
+                <property name="IceSSL.VerifyPeer" value="0"/>
+                <property name="Ice.Plugin.IceSSL" value="IceSSL:createIceSSL"/>
+                <property name="IceSSL.DefaultDir" value="/home/yuhui/glacier2test/conf"/>
+                <property name="IceSSL.CAs" value="cacert.pem"/>
+                <property name="IceSSL.CertFile" value="server.p12"/>
+                <property name="IceSSL.Password" value="password"/>   
+
+                <property name="Glacier2.Client.Trace.Request" value="1"/>
+                <property name="Glacier2.Server.Trace.Request" value="1"/>
+                <property name="Glacier2.Client.Trace.Override" value="1"/>
+                <property name="Glacier2.Server.Trace.Override" value="1"/>
+                <property name="Glacier2.Client.Trace.Reject" value="1"/>
+                <property name="Glacier2.Trace.Session" value="1"/>
+                <property name="Glacier2.Trace.RoutingTable" value="1"/>
+               
+            </properties>
+         </server>
+      </server-template>
+    <server-template id="SSLGlacier2">
+        <parameter name="index" default="0"/>
+         <server id="srv.SSLGlacier2Router.${index}" activation="always" exe="glacier2router">
+            <properties>
+                <property name="Glacier2.InstanceName" value="DemoGlacier2"/>
+                <property name="Glacier2.Client.Endpoints" value="ssl -p 5066"/>
+                <property name="Glacier2.Server.Endpoints" value="tcp"/>
+                <property name="Glacier2.SessionTimeout" value="60"/>
+                <property name="Glacier2.AddConnectionContext" value="1"/>
+                <property name="Glacier2.Client.ForwardContext" value="1"/>
+                <property name="Glacier2.Server.ForwardContext" value="1"/>
+                <property name="Glacier2.RoutingTable.MaxSize" value="1000000"/>                    
+                <property name="Glacier2.SessionManager.LocatorCacheTimeout" value="30"/>            
+                <property name="Glacier2.SessionManager" value="RouterSessionManager"/>
+                <property name="Glacier2.PermissionsVerifier" value="RouterPermissionsVerifier"/>
+                    
+                <property name="IceSSL.VerifyPeer" value="0"/>
+                <property name="Ice.Plugin.IceSSL" value="IceSSL:createIceSSL"/>
+                <property name="IceSSL.DefaultDir" value="/home/yuhui/glacier2test/conf"/>
+                <property name="IceSSL.CAs" value="cacert.pem"/>
+                <property name="IceSSL.CertFile" value="server.p12"/>
+                <property name="IceSSL.Password" value="password"/>   
+
+                <property name="Glacier2.Client.Trace.Request" value="1"/>
+                <property name="Glacier2.Server.Trace.Request" value="1"/>
+                <property name="Glacier2.Client.Trace.Override" value="1"/>
+                <property name="Glacier2.Server.Trace.Override" value="1"/>
+                <property name="Glacier2.Client.Trace.Reject" value="1"/>
+                <property name="Glacier2.Trace.Session" value="1"/>
+                <property name="Glacier2.Trace.RoutingTable" value="1"/>
+               
+            </properties>
+         </server>
+      </server-template>
+      <server-template id="RouterSessionManager">
+         <parameter name="index" default="0"/>
+         <icebox id="icebox.SessionManager.${index}" activation="always" exe="icebox" pwd="/home/yuhui/glacier2test">
+            <env>LD_LIBRARY_PATH=.:lib:/usr/local/thirdparty/glog/lib:/home/yuhui/Ice-3.6.3/lib64:$LD_LIBRARY_PATH</env>
+            <env>seq.configFile=conf/sequence.properties</env>
+            <properties>
+               <properties refid="MultiThreaded"/>
+               <property name="IceGrid.Registry.DynamicRegistration" value="1"/>
+               <property name="Ice.Trace.Network" value="1"/>
+               <property name="IceBox.Trace.ServiceObserver" value="1"/>
+            </properties>
+			<service name="svc.SessionManager" entry="SessionManager:create">
+				<properties>
+				</properties>
+				<adapter name="Glacier2.Server" endpoints="tcp -p 4060" id="RouterSessionManagerAdapter${index}" register-process="true" replica-group="RouterSessionManager-Rep" server-lifetime="false"/>
+			</service>
+         </icebox>
+      </server-template>
+      <replica-group id="RouterSessionManager-Rep">
+         <load-balancing type="round-robin" n-replicas="0"/>
+         <object identity="RouterSessionManager" type="::Glacier2::SessionManager"/>
+         <object identity="RouterPermissionsVerifier" type="::Glacier2::PermissionsVerifier"/>
+         <object identity="SSLRouterSessionManager" type="::Glacier2::SSLSessionManager"/>
+		 <object identity="SSLRouterPermissionsVerifier" type="::Glacier2::SSLPermissionsVerifier"/>
+      </replica-group>
+      <properties id="MultiThreaded">
+         <property name="Ice.PrintStackTraces" value="1"/>
+         <property name="IceSSL.Trace.Security" value="2"/>
+         <property name="Ice.ThreadPool.Client.SizeWarn" value="20"/>
+         <property name="Ice.ThreadPool.Client.SizeMax" value="30"/>
+         <property name="Ice.ThreadPool.Server.Size" value="40"/>
+         <property name="Ice.ThreadPool.Server.SizeWarn" value="50"/>
+         <property name="Ice.ThreadPool.Server.SizeMax" value="60"/>
+         <property name="IceBox.InheritProperties" value="1"/>
+         <property name="Ice.Override.ConnectTimeout" value="5000"/>
+         <property name="Ice.Override.Timeout" value="10000"/>
+         <property name="IceBox.Trace.ServiceObserver" value="1"/>
+         <property name="IceSSL.Trace.Security" value="1"/>
+         <property name="Ice.Default.LocatorCacheTimeout" value="300"/>
+         <property name="IceGrid.Registry.Client.Locator.LocatorCacheTimeout" value="60"/>
+         <property name="Ice.BackgroundLocatorCacheUpdates" value="1"/>
+         <property name="Ice.ACM.Client" value="60"/>
+         <property name="Ice.ACM.Server" value="60"/>
+      </properties>
+      <node name="glacier2test">
+         <server-instance template="AdminSSLGlacier2" index="1"/>
+         <server-instance template="SSLGlacier2" index="1"/>
+         <server-instance template="RouterSessionManager" index="1" />
+      </node>
+
+   </application>
+</icegrid>

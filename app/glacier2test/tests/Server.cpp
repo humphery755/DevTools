@@ -15,78 +15,58 @@
 using namespace std;
 using namespace Ice;
 
-class PermissionsVerifierI : public Glacier2::PermissionsVerifier
+// **********************************************************************
+//
+// Copyright (c) 2003-2016 ZeroC, Inc. All rights reserved.
+//
+// **********************************************************************
+
+#include <Ice/Ice.h>
+#include <glog/logging.h>
+#include "Toolkits.h"
+
+using namespace std;
+
+
+std::string
+getTestEndpoint(const Ice::PropertiesPtr& properties, int num, const std::string& prot)
 {
-public:
-
-    virtual bool
-    checkPermissions(const string& userId, const string& pwd, string&, const Ice::Current& current) const
+    std::ostringstream ostr;
+    std::string protocol = prot;
+    if(protocol.empty())
     {
-        cout << "checkPermissions(" << userId << ","<< pwd <<")"<<endl;
-        return true;
-    }
-};
-class SessionI : public Glacier2::Session
-{
-public:
-
-    SessionI(bool shutdown, bool ssl) : _shutdown(shutdown), _ssl(ssl)
-    {
+        protocol = properties->getPropertyWithDefault("Ice.Default.Protocol", "default");
     }
 
-    virtual void
-    destroy(const Ice::Current& current)
-    {
-      cout << "SessionI->checkPermissidestroyons()"<<endl;
+    int basePort = properties->getPropertyAsIntWithDefault("Test.BasePort", 12010);
 
-        current.adapter->remove(current.id);
-        if(_shutdown)
+    if(protocol == "bt")
+    {
+        //
+        // For Bluetooth, there's no need to specify a port (channel) number.
+        // The client locates the server using its address and a UUID.
+        //
+        switch(num)
         {
-            current.adapter->getCommunicator()->shutdown();
+        case 0:
+            ostr << "default -u 5e08f4de-5015-4507-abe1-a7807002db3d";
+            break;
+        case 1:
+            ostr << "default -u dae56460-2485-46fd-a3ca-8b730e1e868b";
+            break;
+        case 2:
+            ostr << "default -u 99e08bc6-fcda-4758-afd0-a8c00655c999";
+            break;
+        default:
+            assert(false);
         }
     }
-
-    virtual void
-    ice_ping(const Ice::Current& current) const
+    else
     {
-        cout << "SessionI->ice_ping()"<<endl;
+        ostr << protocol << " -p " << (basePort + num);
     }
-
-private:
-
-    const bool _shutdown;
-    const bool _ssl;
-};
-class SessionManagerI : public Glacier2::SessionManager
-{
-public:
-
-    virtual Glacier2::SessionPrx
-    create(const string& userId, const Glacier2::SessionControlPrx&, const Ice::Current& current)
-    {
-        cout << "SessionManagerI->create(" << userId <<")"<<endl;
-        Glacier2::SessionPtr session = new SessionI(false, userId == "ssl");
-        return Glacier2::SessionPrx::uncheckedCast(current.adapter->addWithUUID(session));
-    }
-};
-class SessionServer : public Ice::Application
-{
-public:
-
-    virtual int run(int, char*[]);
-};
-int
-SessionServer::run(int, char**)
-{
-    Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapterWithEndpoints(
-        "Glacier2.Server", "tcp -h 127.0.0.1 -p 12350");
-    adapter->add(new PermissionsVerifierI, communicator()->stringToIdentity("PermissionsVerifier"));
-    adapter->add(new SessionManagerI, communicator()->stringToIdentity("SessionManager"));
-    adapter->activate();
-    communicator()->waitForShutdown();
-    return EXIT_SUCCESS;
+    return ostr.str();
 }
-
 class Server : public Ice::Application
 {
 public:
@@ -97,15 +77,12 @@ public:
 int
 main(int argc, char* argv[])
 {
-    /*
+//#ifdef ICE_STATIC_LIBS
+    Ice::registerIceSSL(false);
+    Ice::registerIceWS(true);
+//#endif
     Server app;
     int status = app.main(argc, argv);
-    */
-#ifdef ICE_STATIC_LIBS
-    Ice::registerIceSSL();
-#endif
-    SessionServer app1;
-    int status = app1.main(argc, argv);
     return status;
 }
 
@@ -117,9 +94,12 @@ Server::run(int argc, char*[])
         cerr << appName() << ": too many arguments" << endl;
         return EXIT_FAILURE;
     }
-    //Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("Server");
-    //Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("tddl.sequences.SequenceService");
-    SessionServerIceBox seqService;
+
+	//if(!startTookits((void*)0))return 1;
+    std::string endpoint =  getTestEndpoint(communicator()->getProperties(), 1,"");
+    cout << endpoint <<endl;
+    communicator()->getProperties()->setProperty("Glacier2.Server.Endpoints", endpoint);
+	SessionServerIceBox seqService;
     std::string name="Server";
     ::Ice::StringSeq ss;
     seqService.start(name,communicator(),ss);

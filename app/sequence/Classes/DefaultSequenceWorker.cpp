@@ -37,7 +37,7 @@ const static unsigned int sequenceBits64 = 61 - datacenterIdBits64;
 static long DELTA = 100000000L;
 std::string tableName="t_sequence";
 
-inline char *my_strchr(const char *str,char ch)
+static inline char *my_strchr(const char *str,char ch)
 {
     char *ptr=(char*)str;
     while(*str != '\0')
@@ -50,7 +50,7 @@ inline char *my_strchr(const char *str,char ch)
 }
 
 //const char * split = (char*)","; 
-void nextRange(string name,DefaultSequenceWorker* out){
+static inline int nextRange(string name,DefaultSequenceWorker* out){
 	//LOG(INFO) << __FUNCTION__ << "(seqName:=" << name << ", SequenceRangeI{value=" << out->value << ",max="<<out->max<<",step="<<out->step << "})";
 	if (name == "") {
 		LOG(ERROR) << "sequence name can't null";
@@ -105,7 +105,7 @@ void nextRange(string name,DefaultSequenceWorker* out){
 			out->value=newValue;
 			out->max=newValue+step;
 			out->step = step;
-			return;
+			return 0;
 		}
 
 		stringstream message;  
@@ -156,7 +156,7 @@ DefaultSequenceWorker::DefaultSequenceWorker(string name, unsigned int workerId,
 
 	pthread_rwlock_init(&lock,NULL);
 
-	nextRange(name,this);
+	if(nextRange(name,this)!=0)throw SequenceException("System Error");
 }
 DefaultSequenceWorker::~DefaultSequenceWorker(){
 	pthread_rwlock_destroy(&lock);
@@ -189,7 +189,7 @@ int DefaultSequenceWorker::getAndIncrement(int step,tddl::sequences::SequenceRan
 	if(retv!=0){
 		WLock lock(&this->lock);
 		if(this->value>=this->max){
-			nextRange(name,this);
+			if(nextRange(name,this)==1)return 1;
 		}
 		retv = addAndIncrement(step,this,sr);
 	}

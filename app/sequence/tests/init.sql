@@ -11,25 +11,29 @@ CREATE TABLE `t_sequence` (
 DELIMITER // 
 CREATE FUNCTION `seq_nextval_v2`(seq_name VARCHAR(50)) RETURNS VARCHAR(64) CHARSET latin1
 BEGIN
-    DECLARE lock_name VARCHAR(64);
     DECLARE retval VARCHAR(64);
     DECLARE val BIGINT;
     DECLARE inc INT;
-    DECLARE seq_lock INT;
-    SET lock_name = CONCAT(':fun:seq:',seq_name);
+    DECLARE i INT;
+    DECLARE rowcount INT;
     SET val = 0;
     SET inc = 0;
-    SET seq_lock = -1;
-    SELECT GET_LOCK(lock_name, 15) INTO seq_lock;
-    IF seq_lock = 1 THEN
-      SELECT VALUE + step, step INTO val, inc FROM T_SEQUENCE WHERE NAME = seq_name FOR UPDATE;
-      IF val > 0 THEN
-          UPDATE T_SEQUENCE SET VALUE = val WHERE NAME = seq_name;
-      END IF;
-      SELECT RELEASE_LOCK(lock_name) INTO seq_lock;
-      SELECT CONCAT(CAST((val - inc) AS CHAR),",",CAST(inc AS CHAR)) INTO retval;
-    ELSE
-      SELECT "-1,0" INTO retval;
-    END IF;    
+    SET i = 0;
+    SET rowcount = 0;
+    SET retval = "-1,0";
+    outer_label:
+    WHILE(i<100) DO
+        SELECT VALUE + step, step INTO val, inc FROM t_sequence WHERE NAME = seq_name;
+        SELECT FOUND_ROWS() INTO rowcount;
+        IF rowcount > 0 THEN
+            UPDATE t_sequence SET VALUE = val WHERE NAME = seq_name AND VALUE=val-inc;
+            SELECT ROW_COUNT() INTO rowcount;
+            IF rowcount > 0 THEN
+              SELECT CONCAT(CAST((val - inc) AS CHAR),",",CAST(inc AS CHAR)) INTO retval;
+              LEAVE  outer_label;
+            END IF;
+        END IF;
+        SET i=i+1;
+    END WHILE;
     RETURN retval;
-END
+END;
